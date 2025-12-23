@@ -5,7 +5,7 @@
 # ```
 
 # Base image
-FROM nvidia/cuda:12.2.2-runtime-ubuntu22.04
+FROM nvidia/cuda:12.1.1-runtime-ubuntu22.04
 
 LABEL maintainer="Kutay Eroglu"
 
@@ -23,8 +23,11 @@ RUN apt-get update && \
     python3-dev \
     python3-pip \
     python-is-python3 && \
-    # Upgrade pip
+    \
+    # Install Python packages
     python3 -m pip install --no-cache-dir --upgrade pip && \
+    python3 -m pip install --no-cache-dir torch==2.5.1 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121 && \
+    \
     # Clean up APT caches to reduce image size
     apt-get autoremove -y && \
     apt-get clean -y && \
