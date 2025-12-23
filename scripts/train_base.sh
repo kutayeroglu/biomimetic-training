@@ -4,7 +4,7 @@
 #SBATCH --output=logs/biomimetic-%j.out
 #SBATCH --error=logs/biomimetic-%j.err
 
-#SBATCH --container-image ghcr.io\#kutayeroglu/ijepa
+#SBATCH --container-image ghcr.io\#kutayeroglu/biomim
 #SBATCH --container-mounts /stratch/dataset:/datasets
 #SBATCH --gpus=1
 #SBATCH --cpus-per-gpu=8
