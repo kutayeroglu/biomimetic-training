@@ -1,7 +1,7 @@
 import time
 import os
 import sys
-from dataops.in1k import get_imagenet_dataloaders
+from src.dataops.in1k import get_imagenet_dataloaders
 
 
 def test_imagenet_loading():
