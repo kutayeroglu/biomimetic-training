@@ -3,3 +3,4 @@ submitit
 tqdm
 matplotlib
 pyyaml
+wandb
