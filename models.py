@@ -93,7 +93,7 @@ if __name__ == "__main__":
     # Initialize Model
     model = AlexNetModified(num_classes=1000)
 
-    # Dummy pass: verify layer dimensions
+    # Dummy pass: verify layer dimensions (imitate cropped input dims)
     dummy_input = torch.randn(1, 3, 227, 227)
     out = model.features(dummy_input)
     print(
