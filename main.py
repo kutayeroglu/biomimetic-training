@@ -60,6 +60,10 @@ def main():
         val_frac=args.val_frac,
     )
 
+    print(f"Dataloaders created successfully")
+    print(f"  - Train batches: {len(train_loader)}")
+    print(f"  - Val batches: {len(val_loader)}")
+
     # Initialize model
     # TODO: Add model initialization
 
