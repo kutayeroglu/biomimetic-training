@@ -1,5 +1,7 @@
 import argparse
 
+import torch
+
 from src.models import AlexNetModified, get_training_setup
 from src.train import train_model
 from src.dataops.in1k import get_imagenet_dataloaders
@@ -60,12 +62,25 @@ def main():
         val_frac=args.val_frac,
     )
 
-    print(f"Dataloaders created successfully")
+    print("Dataloaders created successfully")
     print(f"  - Train batches: {len(train_loader)}")
     print(f"  - Val batches: {len(val_loader)}")
 
     # Initialize model
-    # TODO: Add model initialization
+    model = AlexNetModified(num_classes=1000)
+
+    # Handle device placement
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    model = model.to(device)
+
+    # Setup training components
+    optimizer, criterion = get_training_setup(model)
+
+    # Print model information
+    num_params = sum(p.numel() for p in model.parameters())
+    print("\nModel initialized successfully")
+    print(f"  - Device: {device}")
+    print(f"  - Total parameters: {num_params:,}")
 
     # Train model
     # TODO: Add training call
