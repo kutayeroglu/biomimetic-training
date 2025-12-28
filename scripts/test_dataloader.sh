@@ -21,6 +21,7 @@ echo ""
 
 cd "$HOME/projects/biomimetic-training"
 
+export PYTHONPATH="$PWD:$PYTHONPATH"
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_GPU
 # Note: expandable_segments not supported on this platform
 # export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
