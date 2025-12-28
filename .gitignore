@@ -214,3 +214,6 @@ local/
 # Slurm logs and errors
 *.err
 *.out
+
+# Weights & Biases
+wandb/
