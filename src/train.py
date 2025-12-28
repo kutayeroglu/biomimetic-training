@@ -1,6 +1,9 @@
+import torch
 import torch.nn as nn
+import torchvision.transforms.functional as TF
 from torch.optim import Optimizer
 from torch.utils.data import DataLoader
+from tqdm import tqdm
 
 try:
     import wandb
@@ -11,120 +14,162 @@ except ImportError:
     wandb = None
 
 
+def apply_regimen_transforms(images, blur_sigma, grayscale):
+    """Applies on-the-fly transforms for biomimetic regimens."""
+    if grayscale:
+        images = TF.rgb_to_grayscale(images, num_output_channels=3)
+    if blur_sigma > 0:
+        # Kernel size is typically 4 * sigma + 1 to capture the Gaussian spread
+        kernel_size = int(2 * int(2 * blur_sigma + 0.5) + 1)
+        images = TF.gaussian_blur(
+            images,
+            kernel_size=[kernel_size, kernel_size],
+            sigma=[blur_sigma, blur_sigma],
+        )
+    return images
+
+
 def train_model(
-    # 1. Standard Training Boilerplate
     model: nn.Module,
     train_loader: DataLoader,
     val_loader: DataLoader,
     optimizer: Optimizer,
     criterion: nn.Module,
     total_epochs: int,
-    # 2. Regimen Control Parameters (Phase 1 -> Phase 2)
-    transition_epoch: int = 0,  # Epoch to switch from Phase 1 to Phase 2
-    # Phase 1 Parameters (Before Transition)
-    phase1_blur_sigma: float = 0.0,  # Sigma for Gaussian blur in Phase 1
-    phase1_grayscale: bool = False,  # Whether to use grayscale in Phase 1
-    # Phase 2 Parameters (After Transition)
-    phase2_blur_sigma: float = 0.0,  # Sigma for Gaussian blur in Phase 2
-    phase2_grayscale: bool = False,  # Whether to use grayscale in Phase 2
-    # 3. Hardware/Misc
+    transition_epoch: int = 0,
+    phase1_blur_sigma: float = 0.0,
+    phase1_grayscale: bool = False,
+    phase2_blur_sigma: float = 0.0,
+    phase2_grayscale: bool = False,
     device: str = "cuda",
     save_path: str = "checkpoint.pth",
-    # 4. Logging
     use_wandb: bool = True,
     wandb_project: str = "biomimetic-training",
     wandb_run_name: str = None,
 ) -> None:
-    """
-    Main training loop supporting Standard, Biomimetic, and Anti-Biomimetic regimens.
-
-    Logic:
-        if current_epoch < transition_epoch:
-            Apply Phase 1 settings (phase1_blur_sigma, phase1_grayscale)
-        else:
-            Apply Phase 2 settings (phase2_blur_sigma, phase2_grayscale)
-    """
-    # Determine training regimen
+    # Determine training regimen name for W&B
     if transition_epoch == 0:
         regimen = "Standard"
-        print("\nTraining Regimen: Standard (constant high-quality input)")
     elif phase1_blur_sigma > 0 or phase1_grayscale:
-        if phase2_blur_sigma == 0 and not phase2_grayscale:
-            regimen = "Biomimetic"
-            print("\nTraining Regimen: Biomimetic (degraded → clear)")
-        else:
-            regimen = "Custom"
-            print("\nTraining Regimen: Custom")
-    elif phase2_blur_sigma > 0 or phase2_grayscale:
+        regimen = (
+            "Biomimetic"
+            if (phase2_blur_sigma == 0 and not phase2_grayscale)
+            else "Custom"
+        )
+    elif phase2_blur_sigma > 0 and phase2_grayscale:
         regimen = "Anti-Biomimetic"
-        print("\nTraining Regimen: Anti-Biomimetic (clear → degraded)")
     else:
         regimen = "Standard"
-        print("\nTraining Regimen: Standard (constant high-quality input)")
 
     # Initialize W&B
     if use_wandb and WANDB_AVAILABLE:
-        # Create run name if not provided
         if wandb_run_name is None:
-            wandb_run_name = f"{regimen.lower()}_{transition_epoch}ep"
-            if phase1_blur_sigma > 0 or phase1_grayscale:
-                wandb_run_name += f"_p1b{phase1_blur_sigma}g{int(phase1_grayscale)}"
-            if phase2_blur_sigma > 0 or phase2_grayscale:
-                wandb_run_name += f"_p2b{phase2_blur_sigma}g{int(phase2_grayscale)}"
+            wandb_run_name = f"{regimen.lower()}_{total_epochs}ep"
 
         wandb.init(
             project=wandb_project,
             name=wandb_run_name,
             config={
-                # Training regimen
                 "regimen": regimen,
                 "total_epochs": total_epochs,
                 "transition_epoch": transition_epoch,
-                "phase1_blur_sigma": phase1_blur_sigma,
-                "phase1_grayscale": phase1_grayscale,
-                "phase2_blur_sigma": phase2_blur_sigma,
-                "phase2_grayscale": phase2_grayscale,
-                # Optimizer config (extract from optimizer)
-                "optimizer": type(optimizer).__name__,
                 "learning_rate": optimizer.param_groups[0]["lr"],
-                "momentum": optimizer.param_groups[0].get("momentum", 0),
-                "nesterov": optimizer.param_groups[0].get("nesterov", False),
-                # Data config
-                "batch_size": train_loader.batch_size,
-                "train_batches": len(train_loader),
-                "val_batches": len(val_loader),
-                # Model config
                 "model": type(model).__name__,
-                "num_params": sum(p.numel() for p in model.parameters()),
-                # Hardware
-                "device": device,
-                # Paths
-                "save_path": save_path,
             },
         )
-        print(f"W&B initialized: {wandb.run.url}")
-    elif use_wandb and not WANDB_AVAILABLE:
+
+    best_val_acc = 0.0
+
+    for epoch in range(total_epochs):
+        model.train()
+        running_loss = 0.0
+        correct = 0
+        total = 0
+
+        # Determine current phase parameters
+        if epoch < transition_epoch:
+            curr_sigma, curr_gray = phase1_blur_sigma, phase1_grayscale
+        else:
+            curr_sigma, curr_gray = phase2_blur_sigma, phase2_grayscale
+
+        pbar = tqdm(train_loader, desc=f"Epoch {epoch + 1}/{total_epochs} [{regimen}]")
+        for images, labels in pbar:
+            images, labels = images.to(device), labels.to(device)
+
+            # Apply Phase-specific augmentations
+            images = apply_regimen_transforms(images, curr_sigma, curr_gray)
+
+            optimizer.zero_grad()
+            outputs = model(images)
+            loss = criterion(outputs, labels)
+            loss.backward()
+            optimizer.step()
+
+            running_loss += loss.item()
+            _, predicted = outputs.max(1)
+            total += labels.size(0)
+            correct += predicted.eq(labels).sum().item()
+
+            pbar.set_postfix(
+                {"Loss": f"{loss.item():.4f}", "Acc": f"{100.0 * correct / total:.2f}%"}
+            )
+
+        epoch_loss = running_loss / len(train_loader)
+        epoch_acc = 100.0 * correct / total
+
+        # Validation phase
+        model.eval()
+        val_loss = 0.0
+        val_correct = 0
+        val_total = 0
+        with torch.no_grad():
+            for images, labels in val_loader:
+                images, labels = images.to(device), labels.to(device)
+                outputs = model(images)
+                loss = criterion(outputs, labels)
+
+                val_loss += loss.item()
+                _, predicted = outputs.max(1)
+                val_total += labels.size(0)
+                val_correct += predicted.eq(labels).sum().item()
+
+        val_epoch_loss = val_loss / len(val_loader)
+        val_epoch_acc = 100.0 * val_correct / val_total
+
         print(
-            "Warning: W&B requested but not installed. Install with: pip install wandb"
+            f"Summary: Train Loss: {epoch_loss:.4f} | Train Acc: {epoch_acc:.2f}% | Val Acc: {val_epoch_acc:.2f}%"
         )
-    else:
-        print("W&B logging disabled")
 
-    # TODO: Implement training loop
-    # During training, log metrics like:
-    #   wandb.log({
-    #       "epoch": epoch,
-    #       "train_loss": train_loss,
-    #       "train_acc": train_acc,
-    #       "val_loss": val_loss,
-    #       "val_acc": val_acc,
-    #       "learning_rate": optimizer.param_groups[0]["lr"],
-    #   })
+        # Log metrics to W&B
+        if use_wandb and WANDB_AVAILABLE:
+            wandb.log(
+                {
+                    "epoch": epoch + 1,
+                    "train_loss": epoch_loss,
+                    "train_acc": epoch_acc,
+                    "val_loss": val_epoch_loss,
+                    "val_acc": val_epoch_acc,
+                    "phase_sigma": curr_sigma,
+                    "phase_grayscale": int(curr_gray),
+                }
+            )
 
-    # At the end, optionally log model artifact:
-    #   wandb.log_artifact(save_path, type="model")
+        # Save Checkpoint
+        if val_epoch_acc > best_val_acc:
+            best_val_acc = val_epoch_acc
+            torch.save(
+                {
+                    "epoch": epoch,
+                    "model_state_dict": model.state_dict(),
+                    "optimizer_state_dict": optimizer.state_dict(),
+                    "val_acc": val_epoch_acc,
+                },
+                save_path,
+            )
+            print(f"Checkpoint saved to {save_path}")
 
-    pass
+    if use_wandb and WANDB_AVAILABLE:
+        wandb.finish()
 
 
 # 1. Standard Regimen (Control) Constant high-quality input.
