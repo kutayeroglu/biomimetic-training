@@ -26,6 +26,7 @@ export OMP_NUM_THREADS=$SLURM_CPUS_PER_GPU
 # export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 echo "--- Executing main script ---"
+export WANDB_API_KEY=$(cat $HOME/.wandb_api_key)
 
 python3 main.py \
     --data-dir /datasets/imagenet-object-localization-challenge/ILSVRC/Data/CLS-LOC \
