@@ -208,5 +208,9 @@ __marimo__/
 
 *.DS_Store
 
-# Local/private folder (not tracked in git)
+# Local/private folder
 local/
+
+# Slurm logs and errors
+*.err
+*.out
