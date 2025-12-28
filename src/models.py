@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.optim as optim
 
 
-# 1. The Model Architecture (Replicating 'alexnet22_48')
+# The Model Architecture (Replicating 'alexnet22_48')
 class AlexNetModified(nn.Module):
     def __init__(self, num_classes=1000):
         super(AlexNetModified, self).__init__()
@@ -60,24 +60,7 @@ class AlexNetModified(nn.Module):
         return x
 
 
-# 2. Data Transforms (Replicating 'Rescaling' and 'RandomCrop')
-def get_transforms():
-    # Paper: Rescaling [-1, 1], Random Horizontal Flip, Random Crop to 227x227 [cite: 277]
-    return transforms.Compose(
-        [
-            transforms.Resize(
-                256
-            ),  # Resize usually precedes cropping in ImageNet pipelines
-            transforms.RandomCrop(227),
-            transforms.RandomHorizontalFlip(),
-            transforms.ToTensor(),  # Converts [0, 255] to [0.0, 1.0]
-            # Normalize to get [-1, 1]: (x - 0.5) / 0.5 = 2x - 1
-            transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
-        ]
-    )
-
-
-# 3. Training Configuration (Standard Regimen)
+# Training Configuration (Standard Regimen)
 def get_training_setup(model):
     # Paper: Optimizer SGD, Momentum 0.9, LR 0.001
     optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9, nesterov=True)
