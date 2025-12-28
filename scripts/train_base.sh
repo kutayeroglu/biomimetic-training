@@ -1,8 +1,8 @@
 #!/bin/bash
 
-#SBATCH --job-name=biomimetic
-#SBATCH --output=logs/biomimetic-%j.out
-#SBATCH --error=logs/biomimetic-%j.err
+#SBATCH --job-name=std-regimen
+#SBATCH --output=logs/std-regimen-%j.out
+#SBATCH --error=logs/std-regimen-%j.err
 
 #SBATCH --container-image ghcr.io\#kutayeroglu/biomim
 #SBATCH --container-mounts /stratch/dataset:/datasets
@@ -27,21 +27,12 @@ export OMP_NUM_THREADS=$SLURM_CPUS_PER_GPU
 
 echo "--- Executing main script ---"
 
-# Build command with optional extra args
-# CMD_ARGS=(
-#     --fname configs/in1k_alexnets.yaml
-#     --devices cuda:0
-# )
-
-# Add EXTRA_ARGS if provided (split by spaces to handle multiple arguments)
-# if [ -n "${EXTRA_ARGS:-}" ]; then
-#     # Split EXTRA_ARGS by spaces and add to array
-#     read -ra EXTRA_ARRAY <<< "${EXTRA_ARGS}"
-#     CMD_ARGS+=("${EXTRA_ARRAY[@]}")
-# fi
-
-# python3 main.py "${CMD_ARGS[@]}"
-python3 main.py
-
+python3 main.py \
+    --data-dir /datasets/imagenet-object-localization-challenge/ILSVRC/Data/CLS-LOC \
+    --val-dir $HOME/datasets/imagenet/val \
+    --batch-size 128 \
+    --train-frac 0.001 \
+    --val-frac 0.01
+    
 echo "--- Job Finished Successfully ---"
 
