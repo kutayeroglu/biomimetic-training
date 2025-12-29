@@ -121,6 +121,23 @@ def main():
 
     args = parser.parse_args()
 
+    # Determine regimen name for automatic pathing (matches src/train.py logic)
+    if args.transition_epoch == 0:
+        regimen_str = "standard"
+    elif args.phase1_blur_sigma > 0 or args.phase1_grayscale:
+        regimen_str = "biomimetic" if (args.phase2_blur_sigma == 0 and not args.phase2_grayscale) else "custom"
+    elif args.phase2_blur_sigma > 0 and args.phase2_grayscale:
+        regimen_str = "antibiomimetic"
+    else:
+        regimen_str = "standard"
+
+    # If the user left the default 'checkpoint.pth', make it unique to the regimen
+    if args.save_path == "checkpoint.pth":
+        args.save_path = f"{regimen_str}_checkpoint.pth"
+
+    # Ensure we are using the full absolute path on the cluster
+    args.save_path = os.path.abspath(args.save_path)
+
     # Get imagenet dataloaders
     train_loader, val_loader = get_imagenet_dataloaders(
         data_dir=args.data_dir,
@@ -145,6 +162,21 @@ def main():
     # Setup training components
     optimizer, criterion = get_training_setup(model)
 
+    # Load checkpoint (if exists) 
+    start_epoch = 0
+    best_val_acc = 0.0
+
+    if os.path.exists(args.save_path):
+        print(f"Loading checkpoint found at: {args.save_path}")
+        checkpoint = torch.load(args.save_path, map_location=device)
+        model.load_state_dict(checkpoint['model_state_dict'])
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        
+        start_epoch = checkpoint['epoch'] + 1
+        best_val_acc = checkpoint.get('val_acc', 0.0)
+
+        print(f"Resuming from epoch {start_epoch} (Best Val Acc: {best_val_acc:.2f}%)")
+    
     # Print model information
     num_params = sum(p.numel() for p in model.parameters())
     print("\nModel initialized successfully")
@@ -208,6 +240,8 @@ def main():
         optimizer=optimizer,
         criterion=criterion,
         total_epochs=args.epochs,
+        start_epoch=start_epoch,
+        best_val_acc=best_val_acc,
         transition_epoch=args.transition_epoch,
         phase1_blur_sigma=args.phase1_blur_sigma,
         phase1_grayscale=args.phase1_grayscale,

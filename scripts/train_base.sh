@@ -7,8 +7,8 @@
 #SBATCH --container-image ghcr.io\#kutayeroglu/biomim
 #SBATCH --container-mounts /stratch/dataset:/datasets
 #SBATCH --gpus=1
-#SBATCH --cpus-per-gpu=8
-#SBATCH --mem-per-gpu=40G
+#SBATCH --cpus-per-gpu=12
+#SBATCH --mem-per-gpu=12G
 #SBATCH --time=12:00:00
 
 # Exit immediately if a command exits with a non-zero status.
@@ -22,19 +22,19 @@ echo ""
 cd "$HOME/projects/biomimetic-training"
 
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_GPU
-# Note: expandable_segments not supported on this platform
-# export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 echo "--- Executing main script ---"
 export WANDB_API_KEY=$(cat $HOME/.wandb_api_key)
 
+# Removed the backslash from the last line to prevent syntax errors
 python3 main.py \
     --data-dir /datasets/imagenet-object-localization-challenge/ILSVRC/Data/CLS-LOC \
     --val-dir $HOME/datasets/imagenet/val \
     --batch-size 128 \
     --train-frac 1 \
     --val-frac 1 \
-    --epochs 20
+    --epochs 200 \
+    --num-workers 10 \
+    --save-path standard_checkpoint.pth
     
 echo "--- Job Finished Successfully ---"
-

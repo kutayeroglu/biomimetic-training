@@ -36,6 +36,8 @@ def train_model(
     optimizer: Optimizer,
     criterion: nn.Module,
     total_epochs: int,
+    start_epoch: int = 0,
+    best_val_acc: float = 0.0,
     transition_epoch: int = 0,
     phase1_blur_sigma: float = 0.0,
     phase1_grayscale: bool = False,
@@ -78,9 +80,9 @@ def train_model(
             },
         )
 
-    best_val_acc = 0.0
+    best_val_acc =  best_val_acc
 
-    for epoch in range(total_epochs):
+    for epoch in range(start_epoch, total_epochs):
         model.train()
         running_loss = 0.0
         correct = 0
