@@ -217,3 +217,7 @@ local/
 
 # Weights & Biases
 wandb/
+
+# Model weights and JSON files
+*.pth
+*.json
