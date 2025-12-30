@@ -11,7 +11,7 @@ from src.models import AlexNetModified
 from src.eval.utils import calc_rf_indices, load_images, make_decision
 
 # --- Constants & Configuration ---
-IMG_SIZE = (256, 256, 3)  # Match TensorFlow version
+IMG_SIZE = (227, 227, 3)  # Match TensorFlow version
 NUM_CLASSES = 1000
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -116,7 +116,6 @@ def run_evaluation(
     print(f"  Number of filters (out_channels): {original_weights.shape[0]}")
     print(f"  Calculating rankings (n_top_col_pixel={n_top_col_pixel})...")
 
-    # Calculate rankings using same method as TensorFlow version
     color_index, fft_freq_index, fft_az_index = calc_rf_indices(
         original_weights, n_top_col_pixel=n_top_col_pixel, return_rank=True
     )
