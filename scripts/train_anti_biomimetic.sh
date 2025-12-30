@@ -9,7 +9,7 @@
 #SBATCH --gpus=1
 #SBATCH --cpus-per-gpu=12
 #SBATCH --mem-per-gpu=12G
-#SBATCH --time=18:00:00
+#SBATCH --time=2-18:00:00
 
 # Exit immediately if a command exits with a non-zero status.
 set -e
