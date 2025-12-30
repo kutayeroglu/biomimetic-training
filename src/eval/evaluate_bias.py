@@ -77,8 +77,7 @@ def run_evaluation(
         print(f"  ⚠ WARNING: No PNG files found in {data_path}")
         return pd.DataFrame()
 
-    print(f"  Loading images (size: {IMG_SIZE})...")
-    x_test, y_test = load_images(test_files, IMG_SIZE)
+    x_test, y_test = load_images(test_files, IMG_SIZE, padding_mode="reflect")
     print(f"  ✓ Loaded {len(test_files)} images")
     print(f"  Image shape: {x_test.shape}, dtype: {x_test.dtype}")
     print(f"  Sample labels: {y_test[:3] if len(y_test) >= 3 else y_test}")
