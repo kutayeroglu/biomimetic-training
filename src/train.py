@@ -1,3 +1,4 @@
+import os
 import torch
 import torch.nn as nn
 import torchvision.transforms.functional as TF
@@ -156,19 +157,33 @@ def train_model(
                 }
             )
 
-        # Save Checkpoint
+        # Prepare checkpoint data
+        checkpoint_data = {
+            "epoch": epoch,
+            "model_state_dict": model.state_dict(),
+            "optimizer_state_dict": optimizer.state_dict(),
+            "val_acc": val_epoch_acc,
+        }
+
+        # Determine checkpoint filename with epoch number
+        base_path, ext = os.path.splitext(save_path)
+        checkpoint_path = f"{base_path}_epoch{epoch + 1}{ext}"
+
+        # Save checkpoint at max_epochs / 2
+        mid_epoch = total_epochs // 2
+        if epoch + 1 == mid_epoch:
+            torch.save(checkpoint_data, checkpoint_path)
+            print(f"Mid-training checkpoint saved to {checkpoint_path}")
+
+        # Save best validation accuracy checkpoint
         if val_epoch_acc > best_val_acc:
             best_val_acc = val_epoch_acc
-            torch.save(
-                {
-                    "epoch": epoch,
-                    "model_state_dict": model.state_dict(),
-                    "optimizer_state_dict": optimizer.state_dict(),
-                    "val_acc": val_epoch_acc,
-                },
-                save_path,
-            )
-            print(f"Checkpoint saved to {save_path}")
+            # Save with epoch number for tracking
+            best_checkpoint_path = f"{base_path}_best_epoch{epoch + 1}{ext}"
+            torch.save(checkpoint_data, best_checkpoint_path)
+            # Also save to base path for easy resuming
+            torch.save(checkpoint_data, save_path)
+            print(f"Best checkpoint saved to {best_checkpoint_path} and {save_path} (Val Acc: {val_epoch_acc:.2f}%)")
 
     if use_wandb and WANDB_AVAILABLE:
         wandb.finish()
