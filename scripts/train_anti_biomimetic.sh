@@ -33,8 +33,8 @@ python3 main.py \
     --batch-size 128 \
     --train-frac 0.4 \
     --val-frac 0.3 \
-    --epochs 80 \
-    --transition-epoch 40 \
+    --epochs 120 \
+    --transition-epoch 60 \
     --phase1-blur-sigma 0.0 \
     --phase2-blur-sigma 4.0 \
     --phase2-grayscale \

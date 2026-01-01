@@ -38,9 +38,9 @@ python3 main.py \
     --batch-size 128 \
     --train-frac 0.4 \
     --val-frac 0.3 \
-    --epochs 80 \
+    --epochs 120 \
     --num-workers 12 \
-    --transition-epoch 40 \
+    --transition-epoch 60 \
     --phase1-blur-sigma 4.0 \
     --phase1-grayscale \
     --save-path biomimetic_checkpoint.pth

@@ -170,8 +170,8 @@ def train_model(
         base_path, ext = os.path.splitext(save_path)
         checkpoint_path = f"{base_path}_epoch{epoch + 1}{ext}"
 
-        # Save periodic checkpoint every 20 epochs
-        if (epoch + 1) % 20 == 0:
+        # Save periodic checkpoint every 30 epochs
+        if (epoch + 1) % 30 == 0:
             torch.save(checkpoint_data, checkpoint_path)
             print(f"Periodic checkpoint saved to {checkpoint_path}")
 

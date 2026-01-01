@@ -33,7 +33,7 @@ python3 main.py \
     --batch-size 128 \
     --train-frac 0.4 \
     --val-frac 0.3 \
-    --epochs 80 \
+    --epochs 120 \
     --num-workers 12 \
     --save-path standard_checkpoint.pth
     
