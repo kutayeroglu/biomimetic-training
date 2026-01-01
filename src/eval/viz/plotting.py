@@ -133,9 +133,9 @@ def plot_fig_2c(res_pd, regimen_key, regimen_name, save_path=None):
     ax.set_yticklabels(sorted_ratios.keys())
     ax.set_xlim([-0.05, 1.05])
     ax.set_xticks([0, 0.25, 0.5, 0.75, 1.0])
-    ax.set_xticklabels([0, 25, 50, 75, 100])
-    ax.set_xlabel("Shape-based vs. Texture-based correct decisions (%)")
-    ax.set_title(f"Category Bias: {regimen_name}")
+    ax.set_xticklabels([0.0, 0.25, 0.5, 0.75, 1.0])
+    ax.set_xlabel("Shape/Texture Correct Ratio")
+    ax.set_title(f"Bias by Category: {regimen_name}")
 
     # Add arrows at the bottom
     green_color = np.array([0, 120, 45]) / 255
