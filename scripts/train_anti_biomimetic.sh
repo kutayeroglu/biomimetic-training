@@ -31,14 +31,14 @@ python3 main.py \
     --data-dir /datasets/imagenet-object-localization-challenge/ILSVRC/Data/CLS-LOC \
     --val-dir $HOME/datasets/imagenet/val \
     --batch-size 128 \
-    --train-frac 1 \
-    --val-frac 1 \
-    --epochs 200 \
-    --transition-epoch 100 \
+    --train-frac 0.4 \
+    --val-frac 0.3 \
+    --epochs 80 \
+    --transition-epoch 40 \
     --phase1-blur-sigma 0.0 \
     --phase2-blur-sigma 4.0 \
     --phase2-grayscale \
-    --num-workers 10 \
+    --num-workers 12 \
     --save-path anti_biomimetic_checkpoint.pth
     
 echo "--- Job Finished Successfully ---"
