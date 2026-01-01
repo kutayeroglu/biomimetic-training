@@ -81,7 +81,8 @@ def train_model(
             },
         )
 
-    best_val_acc =  best_val_acc
+    best_val_acc = best_val_acc
+    best_checkpoint_path = None  # Track the current best checkpoint filename
 
     for epoch in range(start_epoch, total_epochs):
         model.train()
@@ -169,21 +170,33 @@ def train_model(
         base_path, ext = os.path.splitext(save_path)
         checkpoint_path = f"{base_path}_epoch{epoch + 1}{ext}"
 
+        # Save periodic checkpoint every 20 epochs
+        if (epoch + 1) % 20 == 0:
+            torch.save(checkpoint_data, checkpoint_path)
+            print(f"Periodic checkpoint saved to {checkpoint_path}")
+
         # Save checkpoint at max_epochs / 2
         mid_epoch = total_epochs // 2
         if epoch + 1 == mid_epoch:
             torch.save(checkpoint_data, checkpoint_path)
             print(f"Mid-training checkpoint saved to {checkpoint_path}")
 
-        # Save best validation accuracy checkpoint (overwrites previous best with new epoch number)
+        # Save best validation accuracy checkpoint (overwrites previous best)
         if val_epoch_acc > best_val_acc:
             best_val_acc = val_epoch_acc
-            # Save with epoch number for tracking
+            # Delete previous best checkpoint file if it exists
+            if best_checkpoint_path is not None and os.path.exists(
+                best_checkpoint_path
+            ):
+                os.remove(best_checkpoint_path)
+            # Save new best checkpoint with epoch number
             best_checkpoint_path = f"{base_path}_epoch{epoch + 1}{ext}"
             torch.save(checkpoint_data, best_checkpoint_path)
             # Also save to base path for resuming
             torch.save(checkpoint_data, save_path)
-            print(f"Best checkpoint saved to {best_checkpoint_path} and {save_path} (Val Acc: {val_epoch_acc:.2f}%)")
+            print(
+                f"Best checkpoint saved to {best_checkpoint_path} and {save_path} (Val Acc: {val_epoch_acc:.2f}%)"
+            )
 
     if use_wandb and WANDB_AVAILABLE:
         wandb.finish()
