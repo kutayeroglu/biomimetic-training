@@ -175,13 +175,13 @@ def train_model(
             torch.save(checkpoint_data, checkpoint_path)
             print(f"Mid-training checkpoint saved to {checkpoint_path}")
 
-        # Save best validation accuracy checkpoint
+        # Save best validation accuracy checkpoint (overwrites previous best with new epoch number)
         if val_epoch_acc > best_val_acc:
             best_val_acc = val_epoch_acc
             # Save with epoch number for tracking
-            best_checkpoint_path = f"{base_path}_best_epoch{epoch + 1}{ext}"
+            best_checkpoint_path = f"{base_path}_epoch{epoch + 1}{ext}"
             torch.save(checkpoint_data, best_checkpoint_path)
-            # Also save to base path for easy resuming
+            # Also save to base path for resuming
             torch.save(checkpoint_data, save_path)
             print(f"Best checkpoint saved to {best_checkpoint_path} and {save_path} (Val Acc: {val_epoch_acc:.2f}%)")
 
