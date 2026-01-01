@@ -114,8 +114,8 @@ def plot_fig_2c(res_pd, regimen_key, regimen_name, save_path=None):
         else:
             ratios[cat.capitalize()] = 0
 
-    # Sort categories by ratio for visualization
-    sorted_ratios = dict(sorted(ratios.items(), key=lambda item: item[1]))
+    # Sort categories by ratio for visualization (highest at bottom)
+    sorted_ratios = dict(sorted(ratios.items(), key=lambda item: item[1], reverse=True))
 
     fig, ax = plt.subplots(figsize=(8, 8))
     ax.axvline(x=0.5, color="gray", linestyle="--", alpha=0.5)
@@ -126,8 +126,7 @@ def plot_fig_2c(res_pd, regimen_key, regimen_name, save_path=None):
         y_pos,
         color=STANDARD_RED,
         s=100,
-        marker="|",
-        linewidth=3,
+        marker="o",
     )
 
     ax.set_yticks(y_pos)
@@ -137,6 +136,51 @@ def plot_fig_2c(res_pd, regimen_key, regimen_name, save_path=None):
     ax.set_xticklabels([0, 25, 50, 75, 100])
     ax.set_xlabel("Shape-based vs. Texture-based correct decisions (%)")
     ax.set_title(f"Category Bias: {regimen_name}")
+
+    # Add arrows at the bottom
+    green_color = np.array([0, 120, 45]) / 255
+    dark_grey = np.array([80, 80, 80]) / 255
+
+    # Arrow pointing left (Texture)
+    ax.annotate(
+        "",
+        xy=(0.15, -0.5),
+        xytext=(0.45, -0.5),
+        arrowprops=dict(arrowstyle="->", color=green_color, lw=3),
+    )
+    ax.text(
+        0.3,
+        -0.5,
+        "Texture",
+        ha="center",
+        va="center",
+        color="white",
+        bbox=dict(boxstyle="round,pad=0.3", facecolor=green_color, edgecolor="none"),
+        fontsize=10,
+        fontweight="bold",
+    )
+
+    # Arrow pointing right (Shape)
+    ax.annotate(
+        "",
+        xy=(0.85, -0.5),
+        xytext=(0.55, -0.5),
+        arrowprops=dict(arrowstyle="->", color=dark_grey, lw=3),
+    )
+    ax.text(
+        0.7,
+        -0.5,
+        "Shape",
+        ha="center",
+        va="center",
+        color="white",
+        bbox=dict(boxstyle="round,pad=0.3", facecolor=dark_grey, edgecolor="none"),
+        fontsize=10,
+        fontweight="bold",
+    )
+
+    # Adjust ylim to accommodate arrows
+    ax.set_ylim([-0.8, len(sorted_ratios) - 0.5])
 
     plt.tight_layout()
     if save_path:
