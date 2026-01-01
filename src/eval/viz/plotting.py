@@ -1,4 +1,5 @@
 import ast
+from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -20,8 +21,16 @@ BIOMIMETIC_BLUE = np.array([0, 82, 137]) / 255
 # --- Helper Functions ---
 
 
-def load_and_parse_results(file_path):
-    """Loads CSV and ensures data is accessible as lists."""
+def load_and_parse_results(file_path: str) -> pd.DataFrame:
+    """
+    Load CSV results file and parse string representations of lists into actual lists.
+
+    Args:
+        file_path: Path to the CSV file containing evaluation results.
+
+    Returns:
+        DataFrame with parsed cell values (strings like "[1, 2, 3]" converted to lists).
+    """
     df = pd.read_csv(file_path, index_col=0)
 
     # Convert string "[s, o, t]" to actual lists if they are strings
@@ -36,10 +45,24 @@ def load_and_parse_results(file_path):
 # --- Figure Plotting Functions ---
 
 
-def plot_fig_1_top(res_pd, regimen_key, regimen_name, save_path=None):
+def plot_fig_1_top(
+    res_pd: pd.DataFrame,
+    regimen_key: str,
+    regimen_name: str,
+    save_path: Optional[str] = None,
+) -> None:
     """
-    Generates Figure 1 Top: Texture vs Shape Barplot.
-    Shows overall classification behavior at baseline (ablation 0).
+    Generate Figure 1 Top: Texture vs Shape Barplot.
+
+    Shows overall classification behavior at baseline (ablation 0), displaying
+    the percentage of classifications that favor shape vs texture bias.
+
+    Args:
+        res_pd: DataFrame containing evaluation results with columns like
+                "color_{regimen_key}_ablation_0".
+        regimen_key: Key identifier for the training regimen (e.g., "standard" or "biomimetic").
+        regimen_name: Display name for the regimen to show in the plot.
+        save_path: Optional path to save the figure. If None, the figure is only displayed.
     """
     fig, ax = plt.subplots(figsize=(7, 5))
     count_types = ["Shape", "Other", "Texture"]
@@ -98,10 +121,24 @@ def plot_fig_1_top(res_pd, regimen_key, regimen_name, save_path=None):
     plt.show()
 
 
-def plot_fig_1_down(res_pd, regimen_key, regimen_name, save_path=None):
+def plot_fig_1_down(
+    res_pd: pd.DataFrame,
+    regimen_key: str,
+    regimen_name: str,
+    save_path: Optional[str] = None,
+) -> None:
     """
-    Generates Figure 1 Down: Category-wise Shape/Texture Ratio.
-    Shows which specific categories are most biased.
+    Generate Figure 1 Down: Category-wise Shape/Texture Ratio.
+
+    Shows which specific categories are most biased toward shape vs texture,
+    displaying a scatter plot of shape/texture ratios for each category.
+
+    Args:
+        res_pd: DataFrame containing evaluation results with columns like
+                "color_{regimen_key}_ablation_0".
+        regimen_key: Key identifier for the training regimen (e.g., "standard" or "biomimetic").
+        regimen_name: Display name for the regimen to show in the plot title.
+        save_path: Optional path to save the figure. If None, the figure is only displayed.
     """
     col_name = f"color_{regimen_key}_ablation_0"
     summary = res_pd[col_name]
@@ -188,10 +225,26 @@ def plot_fig_1_down(res_pd, regimen_key, regimen_name, save_path=None):
     plt.show()
 
 
-def plot_fig_2_right(res_pd, regimen_key, regimen_name, save_path=None):
+def plot_fig_2_right(
+    res_pd: pd.DataFrame,
+    regimen_key: str,
+    regimen_name: str,
+    save_path: Optional[str] = None,
+) -> None:
     """
-    Generates Figure 2 Right: Texture-Shape Ablation Curves.
-    Shows how bias changes as filters are removed.
+    Generate Figure 2 Right: Texture-Shape Ablation Curves.
+
+    Shows how bias changes as filters are removed through ablation analysis.
+    Displays two subplots comparing low-color and high-color ablation scenarios,
+    showing the percentage of shape vs texture classifications across ablation steps.
+
+    Args:
+        res_pd: DataFrame containing evaluation results with columns like
+                "{rank_idx}_{regimen_key}_ablation_{k}" for different ranking indices
+                and ablation steps.
+        regimen_key: Key identifier for the training regimen (e.g., "standard" or "biomimetic").
+        regimen_name: Display name for the regimen to show in the plot title.
+        save_path: Optional path to save the figure. If None, the figure is only displayed.
     """
     ranking_indices = ["color", "color_reverse"]
     ranking_names = ["Low-color Ablation", "High-color Ablation"]
