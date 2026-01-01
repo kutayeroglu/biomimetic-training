@@ -38,7 +38,7 @@ def load_and_parse_results(file_path):
 
 def plot_fig_1_top(res_pd, regimen_key, regimen_name, save_path=None):
     """
-    Generates Figure 2B: Texture vs Shape Barplot.
+    Generates Figure 1 Top: Texture vs Shape Barplot.
     Shows overall classification behavior at baseline (ablation 0).
     """
     fig, ax = plt.subplots(figsize=(7, 5))
@@ -98,9 +98,9 @@ def plot_fig_1_top(res_pd, regimen_key, regimen_name, save_path=None):
     plt.show()
 
 
-def plot_fig_2c(res_pd, regimen_key, regimen_name, save_path=None):
+def plot_fig_1_down(res_pd, regimen_key, regimen_name, save_path=None):
     """
-    Generates Figure 2C: Category-wise Shape/Texture Ratio.
+    Generates Figure 1 Down: Category-wise Shape/Texture Ratio.
     Shows which specific categories are most biased.
     """
     col_name = f"color_{regimen_key}_ablation_0"
@@ -188,9 +188,9 @@ def plot_fig_2c(res_pd, regimen_key, regimen_name, save_path=None):
     plt.show()
 
 
-def plot_fig_2de(res_pd, regimen_key, regimen_name, save_path=None):
+def plot_fig_2_right(res_pd, regimen_key, regimen_name, save_path=None):
     """
-    Generates Figure 2DE: Texture-Shape Ablation Curves.
+    Generates Figure 2 Right: Texture-Shape Ablation Curves.
     Shows how bias changes as filters are removed.
     """
     ranking_indices = ["color", "color_reverse"]
@@ -219,16 +219,14 @@ def plot_fig_2de(res_pd, regimen_key, regimen_name, save_path=None):
             for val in res_pd[col_name].values:
                 step_totals += np.array(val)
 
-            # Normalize by baseline total to see relative performance drop
-            baseline_total = np.sum(
-                np.array(res_pd[f"{rank_idx}_{regimen_key}_ablation_0"].iloc[0])
-            ) * len(res_pd)
-            # Actually, normalize by the current step's total to match paper if preferred
-            # Here we use total images at baseline as the denominator
-            den = np.sum(np.array(res_pd[f"{rank_idx}_{regimen_key}_ablation_0"].sum()))
-
-            shape_curve.append(step_totals[0] / den)
-            texture_curve.append(step_totals[2] / den)
+            # Normalize by current step's total (not baseline) to show percentage of current classifications
+            current_step_total = np.sum(step_totals)
+            if current_step_total > 0:
+                shape_curve.append(step_totals[0] / current_step_total)
+                texture_curve.append(step_totals[2] / current_step_total)
+            else:
+                shape_curve.append(0)
+                texture_curve.append(0)
 
         ax.plot(
             range(len(shape_curve)),
@@ -245,11 +243,11 @@ def plot_fig_2de(res_pd, regimen_key, regimen_name, save_path=None):
             linewidth=3,
         )
 
-        ax.set_ylim([0, 0.4])
-        ax.set_yticks([0, 0.1, 0.2, 0.3, 0.4])
-        ax.set_yticklabels([0, 10, 20, 30, 40])
+        ax.set_ylim([0, 1.0])
+        ax.set_yticks([0, 0.2, 0.4, 0.6, 0.8, 1.0])
+        ax.set_yticklabels([0, 20, 40, 60, 80, 100])
         ax.set_xlabel("% RFs ablated")
-        ax.set_ylabel("Total classifications (%)")
+        ax.set_ylabel("% of Total Classifications")
         ax.set_title(title)
         ax.legend()
 
