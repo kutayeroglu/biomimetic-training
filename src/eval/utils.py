@@ -158,10 +158,19 @@ def calc_rf_indices(
     assert isinstance(return_rank, bool), "return_rank must be a boolean"
     assert len(weights.shape) == 4, "Weights must be 4D"
 
+    print(f"calc_rf_indices: Input weights shape: {weights.shape}")
+    print(
+        f"calc_rf_indices: Parameters - n_top_col_pixel={n_top_col_pixel}, n_times={n_times}, angle_interval={angle_interval}, return_rank={return_rank}, color_only={color_only}"
+    )
+
     # PyTorch: [out_channels, in_channels, H, W] -> transpose to [H, W, in_channels, out_channels] for processing
     weights_tf_format = np.transpose(
         weights, (2, 3, 1, 0)
     )  # [H, W, in_channels, out_channels]
+
+    print(
+        f"calc_rf_indices: Transposed weights shape (TF format): {weights_tf_format.shape}"
+    )
 
     # Check if weights are square (H == W) for the assertion
     assert weights_tf_format.shape[0] == weights_tf_format.shape[1], (
@@ -170,8 +179,12 @@ def calc_rf_indices(
 
     weights_norm = np.zeros(weights_tf_format.shape)
     num_rf = weights_tf_format.shape[3]  # out_channels
+    print(f"calc_rf_indices: Processing {num_rf} receptor fields")
+
     for i in range(num_rf):
         weights_norm[:, :, :, i] = normalize(weights_tf_format[:, :, :, i])
+
+    print("calc_rf_indices: Normalized weights. Computing color indices...")
 
     # Color index
     color_index = np.array(
@@ -181,16 +194,27 @@ def calc_rf_indices(
         ]
     )
 
+    print(
+        f"calc_rf_indices: Color index computed. Shape: {color_index.shape}, Range: [{np.min(color_index):.4f}, {np.max(color_index):.4f}]"
+    )
+
     if color_only:
         if return_rank:
-            return np.argsort(color_index)
+            result = np.argsort(color_index)
+            print(f"calc_rf_indices: Returning color rank only. Shape: {result.shape}")
+            return result
         else:
+            print("calc_rf_indices: Returning color index only.")
             return color_index
+
+    print(f"calc_rf_indices: Computing FFT indices for {num_rf} filters...")
 
     # FFT index
     fft_freq_index = []
     fft_az_index = []
     for i in range(num_rf):
+        if (i + 1) % 10 == 0 or i == 0 or i == num_rf - 1:
+            print(f"calc_rf_indices: Processing FFT for filter {i + 1}/{num_rf}")
         peak_freq, mrl = calc_fft_index(
             weights_norm[:, :, :, i], n_times, angle_interval
         )
@@ -200,12 +224,25 @@ def calc_rf_indices(
     fft_freq_index = np.array(fft_freq_index)
     fft_az_index = np.array(fft_az_index)
 
+    print(
+        f"calc_rf_indices: FFT frequency index computed. Shape: {fft_freq_index.shape}, Range: [{np.min(fft_freq_index):.4f}, {np.max(fft_freq_index):.4f}]"
+    )
+    print(
+        f"calc_rf_indices: FFT azimuth index computed. Shape: {fft_az_index.shape}, Range: [{np.min(fft_az_index):.4f}, {np.max(fft_az_index):.4f}]"
+    )
+
     if return_rank:
         color_rank = np.argsort(color_index)
         fft_freq_rank = np.argsort(fft_freq_index)
         fft_az_rank = np.argsort(fft_az_index)
+        print(
+            f"calc_rf_indices: Returning ranks. Shapes: color={color_rank.shape}, freq={fft_freq_rank.shape}, az={fft_az_rank.shape}"
+        )
         return color_rank, fft_freq_rank, fft_az_rank
 
+    print(
+        f"calc_rf_indices: Returning indices. Shapes: color={color_index.shape}, freq={fft_freq_index.shape}, az={fft_az_index.shape}"
+    )
     return color_index, fft_freq_index, fft_az_index
 
 
