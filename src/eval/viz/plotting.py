@@ -255,41 +255,46 @@ def plot_fig_2_right(
         np.array([0, 120, 45]) / 255,
     ]  # Shape, Texture
 
-    num_ablations = 48
+    num_ablations = 48  # equal to number of filters in first layer of the model
 
     for i, (rank_idx, title) in enumerate(zip(ranking_indices, ranking_names)):
         ax = axes[i]
         shape_curve = []
         texture_curve = []
+        percentage_of_ablated_filters = []
 
         # Calculate totals for each ablation step
         for k in range(num_ablations + 1):
             col_name = f"{rank_idx}_{regimen_key}_ablation_{k}"
             if col_name not in res_pd.columns:
+                print(f"Column {col_name} not found.")
                 continue
 
             step_totals = np.zeros(3)
             for val in res_pd[col_name].values:
+                # Each val is a list of 3 integers: [shape_correct, other, texture_correct]
                 step_totals += np.array(val)
 
-            # Normalize by current step's total (not baseline) to show percentage of current classifications
-            current_step_total = np.sum(step_totals)
-            if current_step_total > 0:
-                shape_curve.append(step_totals[0] / current_step_total)
-                texture_curve.append(step_totals[2] / current_step_total)
+            # Normalize by total number of predictions to show percentage of current classifications
+            total_num_predictions = np.sum(step_totals)
+            if total_num_predictions > 0:
+                shape_curve.append(step_totals[0] / total_num_predictions)
+                texture_curve.append(step_totals[2] / total_num_predictions)
             else:
                 shape_curve.append(0)
                 texture_curve.append(0)
 
+            percentage_of_ablated_filters.append((k / num_ablations) * 100)
+
         ax.plot(
-            range(len(shape_curve)),
+            percentage_of_ablated_filters,
             shape_curve,
             label="Shape",
             color=colors[0],
             linewidth=3,
         )
         ax.plot(
-            range(len(texture_curve)),
+            percentage_of_ablated_filters,
             texture_curve,
             label="Texture",
             color=colors[1],
