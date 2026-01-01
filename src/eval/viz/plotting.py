@@ -121,6 +121,115 @@ def plot_fig_1_top(
     plt.show()
 
 
+def plot_fig_1_top_multi(
+    res_pd_list: list[pd.DataFrame],
+    regimen_keys: list[str],
+    regimen_names: list[str],
+    save_path: Optional[str] = None,
+) -> None:
+    """
+    Generate Figure 1 Top (Multi-regimen): Texture vs Shape Barplot with multiple regimens.
+
+    Shows overall classification behavior at baseline (ablation 0) for multiple regimens,
+    displaying the percentage of classifications that favor shape vs texture bias.
+    Each regimen is shown as a group with Shape and Texture bars side-by-side.
+
+    Args:
+        res_pd_list: List of DataFrames, one per regimen, each containing evaluation results
+                    with columns like "color_{regimen_key}_ablation_0".
+        regimen_keys: List of key identifiers for training regimens (e.g., ["standard", "biomimetic"]).
+        regimen_names: List of display names for regimens to show on the x-axis.
+        save_path: Optional path to save the figure. If None, the figure is only displayed.
+    """
+    if len(res_pd_list) != len(regimen_keys) or len(regimen_keys) != len(regimen_names):
+        raise ValueError(
+            "res_pd_list, regimen_keys, and regimen_names must have the same length"
+        )
+
+    colors = [
+        np.array([80, 80, 80]) / 255,  # Shape - gray
+        np.array([0, 82, 190]) / 255,  # Other - blue
+        np.array([0, 120, 45]) / 255,  # Texture - green
+    ]
+
+    # Process each regimen to extract and normalize percentages
+    summary_percentages = []
+    for res_pd, regimen_key in zip(res_pd_list, regimen_keys):
+        col_name = f"color_{regimen_key}_ablation_0"
+        if col_name not in res_pd.columns:
+            print(
+                f"Column {col_name} not found in DataFrame for regimen {regimen_key}."
+            )
+            continue
+
+        summary = res_pd[col_name]
+        totals = np.zeros(3)
+        for val in summary.values:
+            totals += np.array(val)
+
+        # Normalize to percentages
+        summary_pct = totals / np.sum(totals)
+        summary_percentages.append(summary_pct)
+
+    if not summary_percentages:
+        print("No valid data found for any regimen.")
+        return
+
+    # Create figure with appropriate width based on number of regimens
+    num_regimens = len(summary_percentages)
+    fig_width = max(6.5, 2.5 * num_regimens)
+    fig, ax = plt.subplots(figsize=(fig_width, 5))
+
+    # Grouped bar positioning (similar to original create_texture_shape_barplot)
+    x = np.arange(num_regimens)
+    width = 0.25
+    gap = 0.05
+
+    # Position for Shape and Texture bars
+    shape_pos = -width / 2 - gap / 2
+    texture_pos = width / 2 + gap / 2
+
+    # Extract Shape and Texture percentages (indices 0 and 2, skipping Other)
+    shape_values = [pct[0] for pct in summary_percentages]
+    texture_values = [pct[2] for pct in summary_percentages]
+
+    # Plot bars
+    ax.bar(
+        x + shape_pos,
+        shape_values,
+        width,
+        color=colors[0],
+        edgecolor="black",
+        label="Shape",
+    )
+    ax.bar(
+        x + texture_pos,
+        texture_values,
+        width,
+        color=colors[2],
+        edgecolor="black",
+        label="Texture",
+    )
+
+    # Configure axes
+    ax.set_xticks(x)
+    ax.set_xticklabels(regimen_names, fontsize=12)
+    ax.set_xlabel("Training regimen", fontsize=14)
+    ax.set_ylabel("% classifications", fontsize=14)
+    ax.set_ylim([0, 0.5])
+    ax.set_yticks([0, 0.1, 0.2, 0.3, 0.4, 0.5])
+    ax.set_yticklabels([0, 10, 20, 30, 40, 50])
+    ax.set_title("Behavioral Bias", fontsize=16)
+
+    # Add legend
+    ax.legend(loc="upper right", fontsize=12)
+
+    plt.tight_layout()
+    if save_path:
+        plt.savefig(save_path, dpi=DPI)
+    plt.show()
+
+
 def plot_fig_1_down(
     res_pd: pd.DataFrame,
     regimen_key: str,
