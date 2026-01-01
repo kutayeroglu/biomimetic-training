@@ -334,6 +334,166 @@ def plot_fig_1_down(
     plt.show()
 
 
+def plot_fig_1_down_multi(
+    res_pd_list: list[pd.DataFrame],
+    regimen_keys: list[str],
+    regimen_names: list[str],
+    save_path: Optional[str] = None,
+) -> None:
+    """
+    Generate Figure 1 Down (Multi-regimen): Category-wise Shape/Texture Ratio for multiple regimens.
+
+    Shows which specific categories are most biased toward shape vs texture for multiple regimens,
+    displaying a scatter plot of shape/texture ratios for each category. Each regimen is
+    represented by dots in different colors on the same horizontal line per category.
+
+    Args:
+        res_pd_list: List of DataFrames, one per regimen, each containing evaluation results
+                    with columns like "color_{regimen_key}_ablation_0".
+        regimen_keys: List of key identifiers for training regimens (e.g., ["standard", "biomimetic"]).
+        regimen_names: List of display names for regimens to show in the legend.
+        save_path: Optional path to save the figure. If None, the figure is only displayed.
+    """
+    if len(res_pd_list) != len(regimen_keys) or len(regimen_keys) != len(regimen_names):
+        raise ValueError(
+            "res_pd_list, regimen_keys, and regimen_names must have the same length"
+        )
+
+    # Color palette - use STANDARD_RED and BIOMIMETIC_BLUE for first two, extend for more
+    default_colors = [
+        STANDARD_RED,
+        BIOMIMETIC_BLUE,
+        np.array([0, 128, 128]) / 255,  # Teal
+        np.array([128, 0, 128]) / 255,  # Purple
+        np.array([255, 165, 0]) / 255,  # Orange
+    ]
+    # Use default colors if we have fewer regimens, otherwise cycle
+    colors = (
+        default_colors[: len(regimen_names)]
+        if len(regimen_names) <= len(default_colors)
+        else default_colors
+    )
+
+    # Process each regimen to calculate ratios
+    all_ratios = {}
+
+    for res_pd, regimen_key in zip(res_pd_list, regimen_keys):
+        col_name = f"color_{regimen_key}_ablation_0"
+        if col_name not in res_pd.columns:
+            print(
+                f"Column {col_name} not found in DataFrame for regimen {regimen_key}."
+            )
+            continue
+
+        summary = res_pd[col_name]
+        ratios = {}
+        for cat, val in summary.items():
+            shape, _, texture = val
+            cat_capitalized = cat.capitalize()
+            if (shape + texture) > 0:
+                ratios[cat_capitalized] = shape / (shape + texture)
+            else:
+                ratios[cat_capitalized] = 0
+        all_ratios[regimen_key] = ratios
+
+    if not all_ratios:
+        print("No valid data found for any regimen.")
+        return
+
+    # Get categories in sorted order (by first regimen's ratios, descending)
+    first_regimen_key = list(all_ratios.keys())[0]
+    first_ratios = all_ratios[first_regimen_key]
+    sorted_categories = sorted(
+        first_ratios.items(), key=lambda item: item[1], reverse=True
+    )
+    sorted_category_names = [cat for cat, _ in sorted_categories]
+
+    # Create figure
+    fig, ax = plt.subplots(figsize=(8, 8))
+    ax.axvline(x=0.5, color="gray", linestyle="--", alpha=0.5)
+
+    # Plot each regimen
+    y_pos = np.arange(len(sorted_category_names))
+    for i, (regimen_key, regimen_name) in enumerate(zip(regimen_keys, regimen_names)):
+        if regimen_key not in all_ratios:
+            continue
+
+        ratios = all_ratios[regimen_key]
+        ratio_values = [ratios.get(cat, 0) for cat in sorted_category_names]
+        color = colors[i % len(colors)]
+
+        ax.scatter(
+            ratio_values,
+            y_pos,
+            color=color,
+            s=100,
+            marker="o",
+            label=regimen_name,
+        )
+
+    # Configure axes
+    ax.set_yticks(y_pos)
+    ax.set_yticklabels(sorted_category_names)
+    ax.set_xlim([-0.05, 1.05])
+    ax.set_xticks([0, 0.25, 0.5, 0.75, 1.0])
+    ax.set_xticklabels([0.0, 0.25, 0.5, 0.75, 1.0])
+    ax.set_xlabel("Shape/Texture Correct Ratio")
+    ax.set_title("Bias by Category")
+
+    # Add arrows at the bottom
+    green_color = np.array([0, 120, 45]) / 255
+    dark_grey = np.array([80, 80, 80]) / 255
+
+    # Arrow pointing left (Texture)
+    ax.annotate(
+        "",
+        xy=(0.15, -0.5),
+        xytext=(0.45, -0.5),
+        arrowprops=dict(arrowstyle="->", color=green_color, lw=3),
+    )
+    ax.text(
+        0.3,
+        -0.5,
+        "Texture",
+        ha="center",
+        va="center",
+        color="white",
+        bbox=dict(boxstyle="round,pad=0.3", facecolor=green_color, edgecolor="none"),
+        fontsize=10,
+        fontweight="bold",
+    )
+
+    # Arrow pointing right (Shape)
+    ax.annotate(
+        "",
+        xy=(0.85, -0.5),
+        xytext=(0.55, -0.5),
+        arrowprops=dict(arrowstyle="->", color=dark_grey, lw=3),
+    )
+    ax.text(
+        0.7,
+        -0.5,
+        "Shape",
+        ha="center",
+        va="center",
+        color="white",
+        bbox=dict(boxstyle="round,pad=0.3", facecolor=dark_grey, edgecolor="none"),
+        fontsize=10,
+        fontweight="bold",
+    )
+
+    # Add legend
+    ax.legend(loc="best", fontsize=12)
+
+    # Adjust ylim to accommodate arrows
+    ax.set_ylim([-0.8, len(sorted_category_names) - 0.5])
+
+    plt.tight_layout()
+    if save_path:
+        plt.savefig(save_path, dpi=DPI)
+    plt.show()
+
+
 def plot_fig_2_right(
     res_pd: pd.DataFrame,
     regimen_key: str,
