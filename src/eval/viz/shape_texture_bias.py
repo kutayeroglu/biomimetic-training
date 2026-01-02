@@ -648,9 +648,30 @@ def plot_fig_2_right(
             linewidth=3,
         )
 
-        ax.set_ylim([0, 1.0])
-        ax.set_yticks([0, 0.2, 0.4, 0.6, 0.8, 1.0])
-        ax.set_yticklabels([0, 20, 40, 60, 80, 100])
+        # Calculate maximum value across both curves
+        max_value = max(
+            max(shape_curve) if shape_curve else 0,
+            max(texture_curve) if texture_curve else 0,
+        )
+
+        # Convert to percentage and apply dynamic padding
+        # Add approximately 10 percentage points, or 33% of max, whichever is larger
+        max_percent = max_value * 100
+        padding = max(10, max_percent * 0.33)
+        y_max_percent = max_percent + padding
+
+        # Convert back to proportion and cap at 1.0 (100%)
+        y_max = min(y_max_percent / 100, 1.0)
+
+        # Generate appropriate ticks based on y_max
+        # Use 5 tick marks from 0 to y_max
+        num_ticks = 5
+        y_ticks = np.linspace(0, y_max, num_ticks)
+        y_tick_labels = [int(tick * 100) for tick in y_ticks]
+
+        ax.set_ylim([0, y_max])
+        ax.set_yticks(y_ticks)
+        ax.set_yticklabels(y_tick_labels)
         ax.set_xlabel("% RFs ablated")
         ax.set_ylabel("% of Total Classifications")
         ax.set_title(title)
