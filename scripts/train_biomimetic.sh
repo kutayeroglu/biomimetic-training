@@ -7,9 +7,9 @@
 #SBATCH --container-image ghcr.io\#kutayeroglu/biomim
 #SBATCH --container-mounts /stratch/dataset:/datasets
 #SBATCH --gpus=1
-#SBATCH --cpus-per-gpu=12
+#SBATCH --cpus-per-gpu=16
 #SBATCH --mem-per-gpu=16G
-#SBATCH --time=2-18:00:00
+#SBATCH --time=4-18:00:00
 
 # Exit immediately if a command exits with a non-zero status.
 set -e
@@ -36,11 +36,11 @@ python3 main.py \
     --data-dir /datasets/imagenet-object-localization-challenge/ILSVRC/Data/CLS-LOC \
     --val-dir $HOME/datasets/imagenet/val \
     --batch-size 128 \
-    --train-frac 0.4 \
-    --val-frac 0.3 \
-    --epochs 120 \
-    --num-workers 12 \
-    --transition-epoch 60 \
+    --train-frac 1 \
+    --val-frac 1 \
+    --epochs 100 \
+    --num-workers 16 \
+    --transition-epoch 50 \
     --phase1-blur-sigma 4.0 \
     --phase1-grayscale \
     --save-path biomimetic_checkpoint.pth
