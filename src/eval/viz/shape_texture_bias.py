@@ -1,4 +1,5 @@
 import ast
+import math
 from typing import Optional
 
 import numpy as np
@@ -654,11 +655,9 @@ def plot_fig_2_right(
             max(texture_curve) if texture_curve else 0,
         )
 
-        # Convert to percentage and apply dynamic padding
-        # Add approximately 10 percentage points, or 33% of max, whichever is larger
+        # Convert to percentage and round up to nearest multiple of 10
         max_percent = max_value * 100
-        padding = max(10, max_percent * 0.33)
-        y_max_percent = max_percent + padding
+        y_max_percent = math.ceil(max_percent / 10) * 10
 
         # Convert back to proportion and cap at 1.0 (100%)
         y_max = min(y_max_percent / 100, 1.0)
