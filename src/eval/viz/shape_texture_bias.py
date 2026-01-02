@@ -193,6 +193,18 @@ def plot_fig_1_top_multi(
     shape_values = [pct[0] for pct in summary_percentages]
     texture_values = [pct[2] for pct in summary_percentages]
 
+    # Calculate relative ratio for each regimen: (shape - texture) / (shape + texture)
+    ratios = []
+    for i in range(num_regimens):
+        shape = shape_values[i]
+        texture = texture_values[i]
+        total = shape + texture
+        if total > 0:
+            ratio = (shape - texture) / total
+        else:
+            ratio = 0.0  # Handle edge case where both are zero
+        ratios.append(ratio)
+
     # Plot bars
     ax.bar(
         x + shape_pos,
@@ -211,12 +223,69 @@ def plot_fig_1_top_multi(
         label="Texture",
     )
 
+    # Add percentage labels inside each bar
+    # Helper function to determine text color based on bar color brightness
+    def get_text_color(bar_color):
+        # Calculate luminance (perceived brightness)
+        luminance = 0.299 * bar_color[0] + 0.587 * bar_color[1] + 0.114 * bar_color[2]
+        return "white" if luminance < 0.5 else "black"
+
+    for i in range(num_regimens):
+        # Shape bar label
+        shape_x = x[i] + shape_pos
+        shape_y = shape_values[i] / 2
+        shape_text = f"{shape_values[i] * 100:.0f}%"
+        ax.text(
+            shape_x,
+            shape_y,
+            shape_text,
+            ha="center",
+            va="center",
+            color=get_text_color(colors[0]),
+            fontsize=10,
+            fontweight="bold",
+        )
+
+        # Texture bar label
+        texture_x = x[i] + texture_pos
+        texture_y = texture_values[i] / 2
+        texture_text = f"{texture_values[i] * 100:.0f}%"
+        ax.text(
+            texture_x,
+            texture_y,
+            texture_text,
+            ha="center",
+            va="center",
+            color=get_text_color(colors[2]),
+            fontsize=10,
+            fontweight="bold",
+        )
+
+    # Add Shape/Texture ratio labels above each regimen's bars
+    max_bar_height = max(
+        max(shape_values) if shape_values else 0,
+        max(texture_values) if texture_values else 0,
+    )
+    label_y = max_bar_height + 0.05  # Position slightly above the tallest bar
+
+    for i in range(num_regimens):
+        ratio = ratios[i]
+        ax.text(
+            x[i],  # Center of the regimen group
+            label_y,
+            f"S/T: {ratio:+.2f}",
+            ha="center",
+            va="bottom",
+            fontsize=10,
+            fontweight="bold",
+        )
+
     # Configure axes
     ax.set_xticks(x)
     ax.set_xticklabels(regimen_names, fontsize=12)
     ax.set_xlabel("Training regimen", fontsize=14)
     ax.set_ylabel("% classifications", fontsize=14)
-    ax.set_ylim([0, 0.5])
+    ax.set_ylim([0, 0.3])  # Extended to accommodate ratio labels above bars
     ax.set_yticks([0, 0.1, 0.2, 0.3, 0.4, 0.5])
     ax.set_yticklabels([0, 10, 20, 30, 40, 50])
     ax.set_title("Behavioral Bias", fontsize=16)
