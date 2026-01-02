@@ -9,7 +9,7 @@
 #SBATCH --gpus=1
 #SBATCH --cpus-per-gpu=12
 #SBATCH --mem-per-gpu=12G
-#SBATCH --time=2-18:00:00
+#SBATCH --time=4-18:00:00
 
 # Exit immediately if a command exits with a non-zero status.
 set -e
@@ -31,10 +31,10 @@ python3 main.py \
     --data-dir /datasets/imagenet-object-localization-challenge/ILSVRC/Data/CLS-LOC \
     --val-dir $HOME/datasets/imagenet/val \
     --batch-size 128 \
-    --train-frac 0.4 \
-    --val-frac 0.3 \
-    --epochs 120 \
-    --transition-epoch 60 \
+    --train-frac 1 \
+    --val-frac 1 \
+    --epochs 40 \
+    --transition-epoch 20 \
     --phase1-blur-sigma 0.0 \
     --phase2-blur-sigma 4.0 \
     --phase2-grayscale \
