@@ -483,6 +483,10 @@ def plot_fig_1_down_multi(
 
     # Plot each regimen
     y_pos = np.arange(len(sorted_category_names))
+    # Small vertical offset to prevent overlapping when values are identical
+    num_regimens = len([k for k in regimen_keys if k in all_ratios])
+    jitter_spacing = 0.08  # Adjust this value to control spacing
+
     for i, (regimen_key, regimen_name) in enumerate(zip(regimen_keys, regimen_names)):
         if regimen_key not in all_ratios:
             continue
@@ -491,13 +495,18 @@ def plot_fig_1_down_multi(
         ratio_values = [ratios.get(cat, 0) for cat in sorted_category_names]
         color = colors[i % len(colors)]
 
+        # Center the jitter around the category line
+        offset = (i - (num_regimens - 1) / 2) * jitter_spacing
+        y_pos_jittered = y_pos + offset
+
         ax.scatter(
             ratio_values,
-            y_pos,
+            y_pos_jittered,
             color=color,
             s=100,
             marker="o",
             label=regimen_name,
+            alpha=0.8,  # Slight transparency helps with visibility
         )
 
     # Configure axes
