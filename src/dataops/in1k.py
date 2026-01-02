@@ -90,6 +90,7 @@ def get_imagenet_dataloaders(
         num_workers=num_workers,
         pin_memory=True,
         drop_last=True,
+        persistent_workers=True,
     )
 
     val_loader = DataLoader(
@@ -99,6 +100,7 @@ def get_imagenet_dataloaders(
         sampler=val_sampler,
         num_workers=num_workers,
         pin_memory=True,
+        persistent_workers=True,
     )
 
     return train_loader, val_loader
