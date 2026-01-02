@@ -41,6 +41,12 @@ def plot_fig_2_left(color_metrics, freq_metrics, regimen_name: str, az_metrics=N
         alpha=0.7,
     )
 
+    # Set standardized axis limits and ticks
+    plt.xlim([0, 0.8])
+    plt.xticks([0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8])
+    plt.ylim([2, 7])
+    plt.yticks([2, 3, 4, 5, 6, 7])
+
     # Colorbar removed - no longer coloring by azimuth index
     plt.xlabel("Color Metric")
     plt.ylabel("Frequency Metric")
