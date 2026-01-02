@@ -7,8 +7,8 @@
 #SBATCH --container-image ghcr.io\#kutayeroglu/biomim
 #SBATCH --container-mounts /stratch/dataset:/datasets
 #SBATCH --gpus=1
-#SBATCH --cpus-per-gpu=12
-#SBATCH --mem-per-gpu=12G
+#SBATCH --cpus-per-gpu=16
+#SBATCH --mem-per-gpu=16G
 #SBATCH --time=4-18:00:00
 
 # Exit immediately if a command exits with a non-zero status.
@@ -33,12 +33,12 @@ python3 main.py \
     --batch-size 128 \
     --train-frac 1 \
     --val-frac 1 \
-    --epochs 40 \
-    --transition-epoch 20 \
+    --epochs 100 \
+    --transition-epoch 50 \
     --phase1-blur-sigma 0.0 \
     --phase2-blur-sigma 4.0 \
     --phase2-grayscale \
-    --num-workers 12 \
+    --num-workers 16 \
     --save-path anti_biomimetic_checkpoint.pth
     
 echo "--- Job Finished Successfully ---"
