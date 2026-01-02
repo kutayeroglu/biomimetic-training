@@ -170,16 +170,15 @@ def train_model(
         base_path, ext = os.path.splitext(save_path)
         checkpoint_path = f"{base_path}_epoch{epoch + 1}{ext}"
 
-        # Save periodic checkpoint every 30 epochs
-        if (epoch + 1) % 30 == 0:
+        # Save checkpoint at transition epoch
+        if transition_epoch > 0 and epoch == transition_epoch:
             torch.save(checkpoint_data, checkpoint_path)
-            print(f"Periodic checkpoint saved to {checkpoint_path}")
+            print(f"Transition epoch checkpoint saved to {checkpoint_path}")
 
-        # Save checkpoint at max_epochs / 2
-        mid_epoch = total_epochs // 2
-        if epoch + 1 == mid_epoch:
-            torch.save(checkpoint_data, checkpoint_path)
-            print(f"Mid-training checkpoint saved to {checkpoint_path}")
+        # Save latest checkpoint periodically for resuming (every 10 epochs)
+        if (epoch + 1) % 10 == 0 or epoch + 1 == total_epochs:
+            torch.save(checkpoint_data, save_path)
+            print(f"Latest checkpoint saved to {save_path} (Epoch {epoch + 1})")
 
         # Save best validation accuracy checkpoint (overwrites previous best)
         if val_epoch_acc > best_val_acc:
@@ -190,31 +189,11 @@ def train_model(
             ):
                 os.remove(best_checkpoint_path)
             # Save new best checkpoint with epoch number
-            best_checkpoint_path = f"{base_path}_epoch{epoch + 1}{ext}"
+            best_checkpoint_path = f"{base_path}_best_epoch{epoch + 1}{ext}"
             torch.save(checkpoint_data, best_checkpoint_path)
-            # Also save to base path for resuming
-            torch.save(checkpoint_data, save_path)
             print(
-                f"Best checkpoint saved to {best_checkpoint_path} and {save_path} (Val Acc: {val_epoch_acc:.2f}%)"
+                f"Best checkpoint saved to {best_checkpoint_path} (Val Acc: {val_epoch_acc:.2f}%)"
             )
 
     if use_wandb and WANDB_AVAILABLE:
         wandb.finish()
-
-
-# 1. Standard Regimen (Control) Constant high-quality input.
-# train_model(..., transition_epoch=0,
-#             phase1_blur_sigma=0, phase1_grayscale=False,  # Initial: Clear
-#             phase2_blur_sigma=0, phase2_grayscale=False)  # Final: Clear
-
-# TODO : double-check sigmas
-# 2. Biomimetic Regimen (Developmental) Starts degraded (Phase 1), improves to clear (Phase 2).
-# train_model(..., transition_epoch=100,
-#             phase1_blur_sigma=4.0, phase1_grayscale=True,   # Initial: Blurry/Gray
-#             phase2_blur_sigma=0.0, phase2_grayscale=False)  # Final: Clear/Color
-
-
-# 3. Anti-Biomimetic Regimen (Reverse) Starts clear (Phase 1), degrades to blurry (Phase 2).
-# train_model(..., transition_epoch=100,
-#             phase1_blur_sigma=0.0, phase1_grayscale=False,  # Initial: Clear/Color
-#             phase2_blur_sigma=4.0, phase2_grayscale=True)   # Final: Blurry/Gray
