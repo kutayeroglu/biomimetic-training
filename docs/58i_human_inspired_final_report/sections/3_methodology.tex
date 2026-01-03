@@ -38,21 +38,17 @@ Our work introduces a novel anti-biomimetic regimen to test the importance of th
 \subsubsection{Comparison of Training Regimens}
 While we maintain the same modified AlexNet architecture and hyperparameters (Stochastic Gradient Descent, constant learning rate of 0.001) as the baseline, the temporal order of input quality is reversed in our experimental group.
 
-
-%% TODO table here
-\begin{table}[h]
-\centering
-\caption{Comparison of Training Regimens}
+\begin{center}
+\captionof{table}{Comparison of Training Regimens}
 \label{tab:regimens}
-\begin{tabular}{@{}lll@{}}
+\begin{tabular}{@{}lcc@{}}
 \toprule
-\textbf{Regimen} & \textbf{First Half of Training} & \textbf{Second Half of Training} \\ \midrule
-Standard & High-res, full-color images & High-res, full-color images \\
-Biomimetic & Blurry, achromatic images & High-res, full-color images \\
-Anti-Biomimetic & High-res, full-color images & Blurry, achromatic images \\ \bottomrule
+\textbf{Regimen} & \textbf{First Half} & \textbf{Second Half} \\ \midrule
+Standard & \shortstack{High-res\\Full-color} & \shortstack{High-res\\Full-color} \\ \midrule
+Biomimetic & \shortstack{Blurry\\Grayscale} & \shortstack{High-res\\Full-color} \\ \midrule
+Anti-Biomimetic & \shortstack{High-res\\Full-color} & \shortstack{Blurry\\Grayscale} \\ \bottomrule
 \end{tabular}
-\end{table}
-
+\end{center}
 
 \subsubsection{Implementation Adjustments}
 Due to technical limitations, our implementation utilized 40\% of the training and 30\% of the validation sets, with a total duration of 120 epochs, compared to the original 200 epochs. Despite this reduced scale, the training parameters remained consistent with the baseline to ensure a meaningful comparison of emergent behaviors[cite: 505].
