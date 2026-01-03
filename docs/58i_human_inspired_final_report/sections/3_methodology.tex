@@ -1,0 +1,72 @@
+{\color{gray}\hrule}
+\begin{center}
+\section{Methodology}
+%\textbf{Small description}
+\bigskip
+\end{center}
+{\color{gray}\hrule}
+\begin{multicols}{2}
+
+% talk about evaluation procedure as in section 2
+%% explain reason why alexnet was chosen, and overall description of receptive field analysis (maybe not see end of section 2)
+
+The methodology for this study is structured into two parts: a review of the baseline training regimens and evaluation procedures established by \cite{vogelsang2024impact}, followed by the novel ``anti-biomimetic'' approach proposed in this work.
+
+\subsection{Baseline Methodology}
+The baseline study investigated how training deep neural networks (DNNs) with a developmental progression—starting with degraded inputs and transitioning to high-quality ones—affects their organizational and behavioral characteristics.
+
+\subsubsection{Training Regimens}
+\cite{vogelsang2024impact} utilized two primary training protocols on the ImageNet database\cite{deng2009imagenet}:
+\begin{itemize}
+    \item \textbf{Standard Regimen (Control):} Networks were trained on high-resolution, full-color images for the entire duration of training.
+    \item \textbf{Biomimetic Regimen:} Networks were first trained on blurry, achromatic (grayscale) images for the first half of the training epochs. In the second half, they transitioned to high-resolution, full-color images.
+\end{itemize}
+
+\subsubsection{Architecture and Data Preprocessing}
+While the baseline study tested multiple architectures including ResNet-50\cite{resnet} and Inception v3\cite{inceptionv3}, the core analyses—particularly regarding receptive fields—focused on a modified AlexNet.\cite{alexnet} To facilitate precise spatial frequency analysis, the first-layer filters were increased from $11 \times 11$ to $22 \times 22$ pixels, and the total number of filters was reduced from 96 to 48. Data augmentation was limited to random horizontal flipping, pixel rescaling, and random cropping.
+
+\subsubsection{Evaluation Procedures}
+The baseline work employed two main evaluation phases to link network behavior to internal organization:
+\begin{itemize}
+    \item \textbf{Shape vs. Texture Bias:} Using a ``cue-conflict'' dataset of 1,280 images,\cite{geirhos2018a} the researchers tested whether networks classified objects based on their global shape (e.g., an airplane silhouette) or local texture (e.g., cat fur applied to that silhouette). Decisions were categorized as shape-consistent, texture-consistent, or entirely incorrect.
+    \item \textbf{Receptive Field (RF) Analysis:} The study quantified individual first-layer filters using a color metric (measuring pixel-wise intensity differences across channels) and a spatial frequency metric (using 2D Fast Fourier Transform and radial averaging). This allowed for the identification of ``magnocellular-like'' (low frequency, low color) and ``parvocellular-like'' (high frequency, high color) clusters.
+\end{itemize}
+
+\subsection{Proposed Methodology: Anti-Biomimetic Training}
+Our work introduces a novel anti-biomimetic regimen to test the importance of the order of sensory experience.
+
+\subsubsection{Comparison of Training Regimens}
+While we maintain the same modified AlexNet architecture and hyperparameters (Stochastic Gradient Descent, constant learning rate of 0.001) as the baseline, the temporal order of input quality is reversed in our experimental group.
+
+
+%% TODO table here
+\begin{table}[h]
+\centering
+\caption{Comparison of Training Regimens}
+\label{tab:regimens}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Regimen} & \textbf{First Half of Training} & \textbf{Second Half of Training} \\ \midrule
+Standard & High-res, full-color images & High-res, full-color images \\
+Biomimetic & Blurry, achromatic images & High-res, full-color images \\
+Anti-Biomimetic & High-res, full-color images & Blurry, achromatic images \\ \bottomrule
+\end{tabular}
+\end{table}
+
+
+\subsubsection{Implementation Adjustments}
+Due to technical limitations, our implementation utilized 40\% of the training and 30\% of the validation sets, with a total duration of 120 epochs, compared to the original 200 epochs. Despite this reduced scale, the training parameters remained consistent with the baseline to ensure a meaningful comparison of emergent behaviors[cite: 505].
+
+\begin{quote}
+    \textit{Note on Implementation:} It is important to note that the baseline study did not provide an official public codebase. While an unofficial source written in TensorFlow was identified, we re-implemented the entire training and evaluation pipeline from scratch using PyTorch to ensure full control over the experimental parameters.
+\end{quote}
+
+Data preprocessing steps for all regimens, including our novel anti-biomimetic approach, remained identical to the baseline study. Images were randomly cropped from $256 \times 256$ to $227 \times 227$ pixels (for AlexNet), flipped horizontally at random, and rescaled from a $[0, 255]$ to a $[-1, 1]$ distribution.
+
+%% TODO see all parameters in appendix 
+%% OPTIONAL TODO mention preprocessing for validation set and how it differs from the training set
+
+
+\end{multicols}
+
+

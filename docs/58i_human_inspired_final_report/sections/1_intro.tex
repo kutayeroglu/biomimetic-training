@@ -1,0 +1,21 @@
+\begin{multicols}{2}
+\tableofcontents
+\section{Introduction}
+
+\paragraph{The Texture-Bias Problem in Deep Learning}
+Deep neural networks have established themselves as powerful tools for a wide variety of tasks. Despite their success, these systems exhibit fundamental behavioral differences in the vision domain compared to humans. Specifically, for classification decisions standard Convolutional Neural Networks (CNNs) rely heavily on local texture features, while humans rely mainly on global shape information.\cite{geirhos2018a} Moreover, standard architectures typically struggle to maintain performance when faced with stimulus modifications that lower input quality.\cite{geirhos2018b}
+
+\paragraph{Biological Basis for Biomimetic Training}
+Such behavioral divergences may stem from the radically different "training" regimens experienced by biological versus artificial systems. Human infants begin life with severely limited sensory input; both chromatic perception and spatial resolution are underdeveloped at birth, becoming proficient over months or years following birth.\cite{dobsonandteller1978, adamsandcourage2002} This developmental progression, which begins with limited sensory input that gradually improves, has been hypothesized to provide a scaffold for learning rather than acting as a hurdle.\cite{turkewitzandkenny1982, newport1988, elman1993}
+
+\paragraph{Impact of Isolated Sensory Constraints}
+Past research shows that training networks with initially blurry images expands receptive fields and improves generalization,\cite{vogelsang2018} particularly for face processing\cite{jang2021convolutional} and category learning.\cite{jinsi2023early} Similarly, training with initially color-degraded inputs has been shown to produce more robust internal representations.\cite{vogelsang2024b} However, while these studies highlight the utility of specific sensory limitations, they largely examine these perceptual dimensions in isolation.
+
+\paragraph{Modeling Joint Developmental Trajectories}
+Drawing inspiration from the visual development of newborns, the baseline study for this research\cite{vogelsang2024impact} employs a biomimetic training regimen. This method begins with blurry, achromatic images and subsequently transitions to high-resolution, full-color inputs. By simulating these joint developmental trajectories, the baseline work aims to determine how the co-occurrence of these sensory constraints influences the emergence of global shape bias and the organization of the visual pathway.
+
+\paragraph{The Role of Temporal Order: An Anti-Biomimetic Approach}
+Building on these findings, we examine an "anti-biomimetic" regimen that reverses the natural developmental sequence by training on high-resolution, full-color images before transitioning to blurry, achromatic inputs. This approach investigates whether reversing sensory progression induces "visual forgetting," an amplified texture bias, or other novel emergent behaviors. Ultimately, this comparison seeks to determine whether the specific temporal order of experience—rather than just the data itself—is the primary driver behind visual pathway organization.
+
+
+\end{multicols}
