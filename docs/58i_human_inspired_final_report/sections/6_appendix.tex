@@ -9,35 +9,35 @@
 
 \subsection{Training Setup and Hyperparameters}
 
-The training parameters were kept consistent across both the baseline replication and the novel anti-biomimetic regimen to ensure comparability[cite: 320, 938].
+The training parameters were kept consistent across both the baseline replication and the novel anti-biomimetic regimen to ensure comparability.
 
 \begin{itemize}
-\item \textbf{Optimizer:} Stochastic Gradient Descent (SGD) with a Nesterov momentum of 0.9[cite: 280, 938].
+\item \textbf{Optimizer:} Stochastic Gradient Descent (SGD) with a Nesterov momentum of 0.9.
 
-\item \textbf{Loss Function:} Categorical cross-entropy[cite: 280, 937].
+\item \textbf{Loss Function:} Categorical cross-entropy.
 
-\item \textbf{Learning Rate:} Constant 0.001[cite: 280, 935].
+\item \textbf{Learning Rate:} Constant 0.001.
 
-\item \textbf{Batch Size:} 128[cite: 280, 936].
+\item \textbf{Batch Size:} 128.
 
-\item \textbf{Epochs (Baseline):} 200 epochs, with the transition occurring at epoch 100[cite: 281, 921].
+\item \textbf{Epochs (Baseline):} 200 epochs, with the transition occurring at epoch 100.
 
-\item \textbf{Epochs (This Work):} 120 epochs, with the transition occurring at epoch 60[cite: 504, 932].
+\item \textbf{Epochs (This Work):} 120 epochs, with the transition occurring at epoch 60.
 
 \end{itemize}
 
 \subsection{Data Preprocessing}
 
-Images from the ImageNet database were subjected to the following preprocessing pipeline before being fed into the network[cite: 282, 940]:
+Images from the ImageNet database were subjected to the following preprocessing pipeline before being fed into the network:
 
 \begin{enumerate}
-\item \textbf{Resizing and Cropping:} Original $256 \times 256$ pixel images were randomly cropped to $227 \times 227$ pixel segments for the AlexNet architecture[cite: 282, 942].
+\item \textbf{Resizing and Cropping:} Original $256 \times 256$ pixel images were randomly cropped to $227 \times 227$ pixel segments for the AlexNet architecture.
 
-\item \textbf{Augmentation:} Random horizontal flipping was applied during training[cite: 282, 943].
+\item \textbf{Augmentation:} Random horizontal flipping was applied during training.
 
-\item \textbf{Normalization:} Pixel values were rescaled from a $[0, 255]$ distribution to a $[-1, 1]$ distribution[cite: 282, 944].
+\item \textbf{Normalization:} Pixel values were rescaled from a $[0, 255]$ distribution to a $[-1, 1]$ distribution.
 
-\item \textbf{Degradation (Blur):} When applying blur, a Gaussian kernel with a $\sigma = 4$ was utilized[cite: 284, 329].
+\item \textbf{Degradation (Blur):} When applying blur, a Gaussian kernel with a $\sigma = 4$ was utilized.
 
 \end{enumerate}
 
@@ -47,30 +47,30 @@ To characterize the first-layer filters of the modified AlexNet, the following m
 
 \subsubsection{Color Metric}
 
-The colorfulness $m$ of a filter was determined by computing pixel-wise intensity differences across the RGB channels[cite: 286, 1002]:
+The colorfulness $m$ of a filter was determined by computing pixel-wise intensity differences across the RGB channels:
 
 \begin{equation}
-x = R \cos(0^\circ) + G \cos(120^\circ) + B \cos(-120^\circ) [cite: 287, 1003]
+x = R \cos(0^\circ) + G \cos(120^\circ) + B \cos(-120^\circ)
 \end{equation}
 
 \begin{equation}
-y = R \sin(0^\circ) + G \sin(120^\circ) + B \sin(-120^\circ) [cite: 288, 1004]
+y = R \sin(0^\circ) + G \sin(120^\circ) + B \sin(-120^\circ)
 \end{equation}
 
 \begin{equation}
-m = \sqrt{x^2 + y^2} [cite: 289, 1005]
+m = \sqrt{x^2 + y^2}
 \end{equation}
 
-The final metric was the average of the top 48 (approximately top 10\%) most colorful pixels in the $22 \times 22$ filter[cite: 294].
+The final metric was the average of the top 48 (approximately top 10\%) most colorful pixels in the $22 \times 22$ filter.
 
 \subsubsection{Spatial Frequency Metric}
 
-The spatial frequency was summarized as a weighted average frequency[cite: 298, 1007]:
+The spatial frequency was summarized as a weighted average frequency:
 
 \begin{equation}
-\text{Weighted Average Frequency} = \frac{\sum (amp(f) \cdot f)}{\sum amp(f)} [cite: 300, 1008]
+\text{Weighted Average Frequency} = \frac{\sum (amp(f) \cdot f)}{\sum amp(f)}
 \end{equation}
 
-where $amp(f)$ represents the amplitude of frequency $f$ obtained via a 2D-FFT and radial averaging[cite: 297, 301].
+where $amp(f)$ represents the amplitude of frequency $f$ obtained via a 2D-FFT and radial averaging.
 
 \end{multicols}
