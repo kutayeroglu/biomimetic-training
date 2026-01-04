@@ -36,7 +36,7 @@
 \usepackage{graphicx}
 \graphicspath{{./figures/}}
 % Package for captions outside floats
-\usepackage{caption}
+\usepackage[hypcap=false]{caption}
 
 % Fix headheight warning from fancyhdr
 \setlength{\headheight}{14.5pt}
@@ -55,7 +55,6 @@
 % Makes header
 \pagestyle{fancy}
 \thispagestyle{empty}
-\fancyhead[R]{\textit{Baltic Security Foundation}}
 \fancyhead[L]{}
 % Makes footnotes with an asterisk
 \renewcommand*{\thefootnote}{\fnsymbol{footnote}}

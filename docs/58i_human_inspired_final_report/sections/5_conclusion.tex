@@ -5,4 +5,20 @@
 \end{center}
 {\color{gray}\hrule}
 \vspace{0.5cm}
-\lipsum[1-2]
+
+The results of this study demonstrate that the organization of the visual pathway in deep neural networks is driven by the specific temporal order of sensory experience, rather than just the visual data itself. While the baseline ``biomimetic'' training successfully induced a more human-like shape bias by mimicking the blurry-to-clear progression of human infants, our ``anti-biomimetic'' model revealed that reversing this order leads to fundamentally different behavioral and organizational outcomes.
+
+\subsection{The Failure of Late-Stage Degradation}
+
+Interestingly, the Anti-Biomimetic model exhibited a higher texture bias than even the Standard control model. This suggests that introducing blur in the second half of training is ``too late'' to trigger the structural reorganization required for global shape processing. Instead of building a magnocellular-like system for coarse features, the network likely ``doubled down'' on its existing texture detectors to survive the sudden input degradation.
+
+\subsection{Evidence for a Critical Period}
+
+These findings provide strong evidence for a critical period in the development of global shape bias. If a network is not forced to rely on coarse, achromatic information---features associated with the magnocellular pathway---at the very beginning of its training, it defaults to a reliance on local texture. This default preference appears to become fixed, remaining regardless of subsequent changes to the input quality.
+
+
+\subsection{Future Directions}
+
+While the reduced scale of our training (120 epochs and 40\% ImageNet data) may have dampened more subtle trends, the emergence of clear behavioral shifts in the Anti-Biomimetic model remains a significant finding. Future research could explore whether different learning rates or longer training durations could allow a network to recover from late-stage degradation, or if this ``visual forgetting'' is an irreversible consequence of early high-acuity experience.
+
+This shift toward a reliance on local texture, while seemingly a regression in general object recognition, invites a deeper investigation into the functional purpose of such adaptations. While our current results show that the Anti-Biomimetic regimen leads to an amplified texture bias under normal conditions, it remains an open question whether this regimen provides a survival advantage in high-stress environments. Drawing an analogy to the flabby whalefish, which transitions from a visual juvenile stage to a non-visual, deep-sea adult stage, we hypothesize that 'Anti-Biomimetic' training may induce specialized robustness to low-light conditions. Future work might involve testing our models on images with significantly lowered brightness intensity to determine whether the network's adaptation to late-stage sensory degradation facilitates more successful object recognition in light-deprived environments.

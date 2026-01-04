@@ -8,6 +8,7 @@
 \begin{multicols}{2}
 
 \subsection{Training Setup and Hyperparameters}
+\label{app:train_setup}
 
 The training parameters were kept consistent across both the baseline replication and the novel anti-biomimetic regimen to ensure comparability.
 
@@ -26,7 +27,9 @@ The training parameters were kept consistent across both the baseline replicatio
 
 \end{itemize}
 
+
 \subsection{Data Preprocessing}
+\label{app:data_preprocessing}
 
 Images from the ImageNet database were subjected to the following preprocessing pipeline before being fed into the network:
 
@@ -42,10 +45,12 @@ Images from the ImageNet database were subjected to the following preprocessing 
 \end{enumerate}
 
 \subsection{Receptive Field Metrics}
+\label{app:metrics_rf}
 
 To characterize the first-layer filters of the modified AlexNet, the following metrics were employed:
 
 \subsubsection{Color Metric}
+\label{app:metrics_color}
 
 The colorfulness $m$ of a filter was determined by computing pixel-wise intensity differences across the RGB channels:
 
@@ -72,5 +77,13 @@ The spatial frequency was summarized as a weighted average frequency:
 \end{equation}
 
 where $amp(f)$ represents the amplitude of frequency $f$ obtained via a 2D-FFT and radial averaging.
+
+\subsection{Baseline Receptive Field Ablation Plots}
+
+\begin{center}
+\includegraphics[width=\linewidth]{figures/rf_ablation/baseline-rf-ablation.png}
+\captionof{figure}{Shape-texture bias following the removal of the least colorful (magno-like) and most colorful (parvo-like) units. Comparisons are provided for the standard model (top) and the biomimetic model (bottom).}
+\label{fig:baseline_rf_ablation}
+\end{center}
 
 \end{multicols}

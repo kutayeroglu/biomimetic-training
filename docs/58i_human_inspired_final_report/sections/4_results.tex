@@ -7,26 +7,128 @@
 {\color{gray}\hrule}
 \begin{multicols}{2}
 
-The primary behavioral evaluation focused on the classification strategies of the three networks (standard, biomimetic, anti-biomimetic) when presented with conflicting visual cues. Using the cue-conflict dataset,\cite{geirhos2018a} we quantified the extent to which each regimen developed a "shape bias"—a characteristic typically associated with human visual development but often lacking in standard DNNs.
+To assess the behavioral and organizational differences between training regimens, we evaluated the Standard, Biomimetic, and Anti-Biomimetic models using the PyTorch re-implementation detailed in the methodology. These comparisons account for the specific technical constraints of our environment, including the reduced 120-epoch training duration and 40\% ImageNet\cite{deng2009imagenet} data utilization.
 
-\subsection{Shape vs. Texture Bias Analysis}
-The results of the cue-conflict test reveal significant differences in how the temporal order of sensory input quality influences the final classification strategy of the networks.
+\subsection{Behavioral Analysis: Shape vs. Texture Bias}
 
-\begin{itemize}
-    \item \textbf{Standard Regimen:} Consistent with previous literature, the control network trained exclusively on high-resolution images exhibited a strong \textit{texture bias}. When presented with an image containing the texture of one class (e.g., a "clock") mapped onto the shape of another (e.g., a "bottle"), the network predominantly classified the object based on the local texture.
-    
-    \item \textbf{Biomimetic Regimen:} The network that began training with blurred, achromatic inputs showed a marked increase in \textit{shape bias} compared to the standard regimen. By the end of the 120 epochs, this network demonstrated a higher percentage of shape-consistent decisions, suggesting that the initial period of low-spatial-frequency information forced the network to learn global structural features rather than local high-frequency textures.
-    
-    \item \textbf{Anti-Biomimetic Regimen:} In contrast, the network subjected to the reversed order (high-resolution followed by blurry images) failed to develop a robust shape bias. Interestingly, the transition to degraded inputs in the second half of training did not retroactively instill a shape-centric strategy; instead, it resulted in a degradation of overall classification accuracy while maintaining a residual reliance on the features learned during the first high-resolution phase.
-\end{itemize}
+The degree of shape bias $S$ was calculated as the difference between shape-consistent decisions $D_{shape}$ and texture-consistent decisions $D_{texture}$, relative to the total number of correct category decisions ($D_{shape}$+$D_{texture}$):
 
-\subsection{Quantification of Bias}
-The degree of shape bias $S$ was calculated as the proportion of shape-consistent decisions $D_{shape}$ relative to the total number of correct category decisions (shape-consistent + texture-consistent, $D_{texture}$):
+
 
 \begin{equation}
-S = \frac{D_{shape}}{D_{shape} + D_{texture}}
+S = \frac{D_{shape} - D_{texture}}{D_{shape} + D_{texture}}
 \end{equation}
 
-[Inference] Preliminary analysis indicates that the Biomimetic regimen achieves a significantly higher $S$ value than both the Standard and Anti-Biomimetic regimens, supporting the hypothesis that the developmental "starting small" approach is crucial for human-like visual processing.
+Preliminary analysis indicates that the Biomimetic regimen achieves a significantly higher $S$ value than both the Standard and Anti-Biomimetic regimens, supporting the hypothesis that the developmental approach is crucial for human-like visual processing.
+
+
+\paragraph{Standard Regimen:} Consistent with the baseline study, the control network trained exclusively on high-resolution images exhibited a strong \textit{texture bias} with the degree of shape bias equal to -$0.26$, illustrated in Figure \ref{fig:shapetext_bias_bar}.
+    
+\paragraph{Biomimetic Regimen:} The network that began training with blurred, achromatic inputs showed a marked increase in \textit{shape bias} compared to the standard regimen. At the end of the 120 epochs, this network demonstrated a higher degree of shape bias (+$0.02$), suggesting that the initial period of low-spatial-frequency information forced the network to learn global structural features rather than local high-frequency textures.
+
+\paragraph{Anti-Biomimetic Regimen:} In contrast, the network subjected to the reversed order (high-resolution, chromatic images followed by blurry, achromatic images) failed to develop a robust shape bias. Interestingly, the transition to degraded inputs in the second half of training did not retroactively restructure the network into being more shape-biased; instead, it resulted in an an enhanced texture bias, even higher than the standard regimen. 
+
+
+\begin{center}
+\includegraphics[width=\linewidth]{figures/anti_shape-text_bar_summ.png}
+\captionof{figure}{The bars represent the proportion of correct classifications for texture and shape independently. These do not sum to 100\% because approximately half of the images were classified incorrectly across both metrics. This high error rate is consistent with the original study’s findings on the full dataset, though it is further influenced here by the reduced dataset size.}
+\label{fig:shapetext_bias_bar}
+\end{center}
+
+In addition to the overall percentage of correct classifications, shape/texture bias was analyzed across the sixteen categories established by \cite{geirhos2018a}. While the reduced scale of our training data (40\% of ImageNet) and duration (120 epochs) may have dampened subtle trends, specific categories such as 'dog' and 'bird' demonstrate clear behavioral shifts. 
+
+As illustrated in Figure \ref{fig:shapetext_bias_scatter}, the biomimetic regimen—which transitions from blurry, achromatic inputs to high-resolution, full-color images—shifts the classification bias toward global shape. This aligns with the baseline findings that early experience with degraded sensory inputs facilitates a more human-like shape bias. 
+
+Conversely, our novel anti-biomimetic regimen (reversing the progression to end with degraded inputs) shifted the bias further toward local texture. As shown in the behavioral bias comparison (Figure \ref{fig:shapetext_bias_bar}), the anti-biomimetic model achieved a Shape/Texture ($S/T$) metric of -0.27, exhibiting a stronger texture bias than even the standard control model ($S/T: -0.26$). This suggests that introducing blur in the second half of training may be "too late" to trigger structural reorganization, potentially forcing the network to "double down" on existing texture detectors to survive the input degradation.
+
+
+\begin{center}
+\includegraphics[width=\linewidth]{figures/anti_shape-texture_scatter.png}
+\captionof{figure}{Percentage of shape-based (vs. texture-based) correct predictions for a subset of the 16 categories available in "cue-conflict" dataset. Only successful classifications are included in this analysis.}
+\label{fig:shapetext_bias_scatter}
+\end{center}
+
+
+\subsection{Receptive Field (RF) Organization}
+
+To investigate the underlying neural organization, we analyzed the 48 first-layer filters of the modified AlexNet. We specifically looked for the emergence of ``magnocellular-like'' units, which are characterized by low spatial frequency and low color sensitivity.
+
+To ensure a direct and rigorous comparison with the baseline study, the quantitative ordering of these receptive fields (RFs) in terms of color and spatial frequency was determined by strictly following the metrics established in the original study. Specifically:
+
+\begin{itemize}
+    \item \textbf{Colorfulness:} Each RF was ranked based on a color metric that calculates pixel-wise intensity differences across color channels. Following the baseline methodology, this metric is detailed in ~\ref{app:metrics_color}.
+    
+    \item \textbf{Spatial Frequency:} The spatial frequency of each RF was determined using a weighted average frequency derived from a 2D-FFT analysis. The formal calculation for this metric, as defined in the baseline study, is provided in ~\ref{app:metrics_rf}.
+\end{itemize}
+
+\paragraph{Standard Regimen:} Receptive fields showed no clear relationship between spatial frequency and color tuning. The distribution of receptive fields in Figure \ref{fig:joint-std} illustrates the baseline organizational state of a network trained exclusively on high-resolution, full-color images, showing no clear correlation between spatial and chromatic tuning.
+
+\begin{center}
+\includegraphics[width=\linewidth]{figures/joint_dist/_joint_std.jpg}
+\captionof{figure}{Joint frequency and color metrics for the standard training regimen. Each data point represents one of the 22×22 pixel receptive fields from the model’s initial convolutional layer.}
+\label{fig:joint-std}
+\end{center}
+
+\paragraph{Biomimetic Regimen:} The network successfully developed a distinct cluster of magnocellular-like RFs, confirming the findings of the baseline study. As shown in the scatter plot analysis in Figure~\ref{fig:joint-bio}, the early blurry, achromatic experience drives this specific organization by forcing the network to optimize for low-frequency and low-chromatic features. This cluster (highlighted by the ellipse) represents the emergence of specialized units that drive the model's global shape bias.
+
+\begin{center}
+\includegraphics[width=\linewidth]{figures/joint_dist/joint-biomim.png}
+\captionof{figure}{Joint frequency and color metrics for the biomimetic training regimen. Each data point represents one of the 22×22 pixel receptive fields from the model’s initial convolutional layer.}
+\label{fig:joint-bio}
+\end{center}
+    
+\paragraph{Anti-Biomimetic Regimen:} The model failed to develop an organized cluster similar to the magnocellular-like units found in the biomimetic approach. As illustrated in Figure~\ref{fig:joint-anti-bio}, reversing the temporal order (introducing blurry and achromatic images in the second half of training rather than the first) prevents the network from forming the structural scaffold required for shape-based processing.
+
+\begin{center}
+\includegraphics[width=\linewidth]{figures/joint_dist/_joint_antibio.jpg}
+\captionof{figure}{Joint frequency and color metrics for the anti-biomimetic training regimen. Each data point represents one of the 22×22 pixel receptive fields from the model’s initial convolutional layer.}
+\label{fig:joint-anti-bio}
+\end{center}
+
+\subsection{Causal Analysis: Receptive Field Ablations}
+
+To investigate the underlying neural organization, we analyzed the 48 first-layer filters of the modified AlexNet. We specifically looked for the emergence of ``magnocellular-like'' units, which are characterized by low spatial frequency and low color sensitivity.
+
+
+\subsubsection{Observed Trends and Technical Constraints}
+
+In our re-implementation, the ablation graphs for the Standard, Biomimetic, and Anti-Biomimetic models did not yield a statistically meaningful or visible trend. While the behavioral analysis and RF characterizations aligned with the baseline study, the causal link through ablation remained inconclusive in this specific experiment.
+
+This lack of a clear trend is likely attributable to the reduced scale of our training environment:
+
+\begin{itemize}
+    \item \textbf{Dataset Limitation:} The use of only 40\% of the ImageNet training set may have prevented the network from developing the robust internal redundancies necessary for ablation to show a clear functional impact.
+    
+    \item \textbf{Training Duration:} Conducting training over 120 epochs rather than the original 200 likely dampened the visibility of more subtle representational trends.
+\end{itemize}
+
+
+\begin{center}
+\includegraphics[width=\linewidth]{figures/rf_ablation/my-rf-ablation.png}
+\captionof{figure}{Comparison of shape vs. texture bias across three training regimens—standard (top), biomimetic (middle), and anti-biomimetic (bottom). The results follow the ablation of the least color-sensitive (magno-like) units in the left column and the most color-sensitive (parvo-like) units in the right column.}
+\label{fig:my_rf_abl}
+\end{center}
+
+
+
+\subsubsection{Contrast with Baseline Findings}
+
+Our results stand in contrast to the findings of the baseline study, which established a clear causal role for magnocellular-like units. In the original research, the following was observed:
+
+\begin{itemize}
+    \item \textbf{Selective Sensitivity:} Ablating less than 25\% of the least color-tuned (magno-like) RFs entirely eliminated the shape bias of the biomimetic model.
+    
+    \item \textbf{Parvocellular Stability:} The ablation of the most color-tuned (parvo-like) RFs had no significant effect on shape-based classification.
+    
+    \item \textbf{Control Consistency:} The standard model exhibited no differential outcome regardless of which RF sub-population was ablated.
+\end{itemize}
+
+
+These original findings suggest that the shape bias in biomimetic networks is specifically driven by the magnocellular sub-population of RFs. For a detailed visual comparison with the baseline ablation outcomes, please refer to the Appendix.\ref{fig:baseline_rf_ablation}
+
+
 
 \end{multicols}
+
+
+
